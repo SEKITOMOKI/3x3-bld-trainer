@@ -6,7 +6,7 @@
     <title>三阶盲拧新手练习平台</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- 引入 WCA 官方打乱生成库 -->
-    <script src="https://cdn.cubing.net/v0/js/cubing/twisty" type="module"></script>
+    <!-- <script src="https://cdn.cubing.net/v0/js/cubing/twisty" type="module"></script> -->
     <script type="importmap">
         {
             "imports": {
@@ -37,12 +37,12 @@
                 </div>
             </div>
         </main>
-
+        <!-- 【修改】拖拽条移出 sidebar，防止被滚动条裁剪 -->
+        <div class="resizer" id="dragMe"></div>
 
         <!-- 右侧导航菜单与笔记区 -->
         <aside class="sidebar">
-            <!-- 【新增】拖拽条 -->
-            <div class="resizer" id="dragMe"></div>
+
             <!-- <h1>三阶盲拧<br>新手练习平台</h1> -->
             <div class="menu-list">
                 <a href="category.html?type=corner" class="menu-btn">角块公式 <span>18条</span></a>
@@ -88,7 +88,8 @@
 
     <!-- 引入主要逻辑（3D魔方与打乱） -->
     <script type="module" src="js/main.js"></script>
-    <!-- 【新增】引入联想词库逻辑 -->
+
+    <!-- 【确保这行在 assoc.js 之前或同时存在】如果使用了模块化打包，可能需要调整，但通常 Capacitor 会自动注入全局变量 -->
     <script src="js/assoc.js"></script>
 </body>
 

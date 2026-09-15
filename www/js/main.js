@@ -1,6 +1,12 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
+// 在所有代码最前面加上这行，防止某个元素找不到导致全局崩溃
+window.onerror = function(msg, url, line) {
+    console.error("全局报错:", msg, "行号:", line);
+    return false;
+};
+
 // ================= 1. 基础场景设置 =================
 const container = document.getElementById('canvas-container');
 if (!container) {
@@ -418,47 +424,62 @@ window.addEventListener('resize', () => {
 });
 
 
-// ================= 7. 侧边栏拖拽调整宽度逻辑 =================
+// ================= 7. 侧边栏拖拽调整宽度逻辑（适配平板触摸） =================
 const resizer = document.getElementById('dragMe');
 const sidebar = document.querySelector('.sidebar');
 
 let isResizing = false;
 
-resizer.addEventListener('pointerdown', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+function startResize(clientX) {
     isResizing = true;
     resizer.classList.add('active');
-    resizer.setPointerCapture(e.pointerId);
-});
+    document.body.style.userSelect = 'none';
+}
 
-resizer.addEventListener('pointermove', (e) => {
+function moveResize(clientX) {
     if (!isResizing) return;
     
-    // 因为侧边栏是靠右悬浮的，鼠标向左移动时，宽度 = 屏幕总宽 - 鼠标位置
-    const newWidth = window.innerWidth - e.clientX;
-    // 最小宽度 250px，最大宽度允许覆盖到左侧只剩 50px
-    const maxWidth = window.innerWidth - 50;
+    // 计算新宽度
+    const newWidth = window.innerWidth - clientX;
+    const maxWidth = window.innerWidth - 100; // 左侧至少保留 100px
     
-    if (newWidth > 250 && newWidth < maxWidth) {
+    if (newWidth > 200 && newWidth < maxWidth) {
         sidebar.style.width = newWidth + 'px';
+        // 【核心修复】同步更新拖拽条的 right 属性
+        resizer.style.right = newWidth + 'px';
     }
-});
+}
 
-resizer.addEventListener('pointerup', (e) => {
+function endResize() {
     if (isResizing) {
         isResizing = false;
         resizer.classList.remove('active');
-        resizer.releasePointerCapture(e.pointerId);
-        // 【核心优化】绝对定位不再改变魔方物理尺寸，不需要再通知 Three.js 重新计算
-        // 去掉 window.dispatchEvent(new Event('resize')); 可以消除布局抖动
+        document.body.style.userSelect = '';
+        // 通知 Three.js 重新计算画布大小
+        window.dispatchEvent(new Event('resize'));
     }
-});
+}
 
-resizer.addEventListener('pointercancel', (e) => {
-    if (isResizing) {
-        isResizing = false;
-        resizer.classList.remove('active');
-        resizer.releasePointerCapture(e.pointerId);
-    }
+// ---------- 鼠标事件 (PC) ----------
+resizer.addEventListener('mousedown', (e) => {
+    e.preventDefault();
+    startResize(e.clientX);
 });
+document.addEventListener('mousemove', (e) => moveResize(e.clientX));
+document.addEventListener('mouseup', endResize);
+
+// ---------- 触摸事件 (平板/手机) ----------
+resizer.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    const touch = e.touches[0];
+    startResize(touch.clientX);
+}, { passive: false });
+
+document.addEventListener('touchmove', (e) => {
+    if (!isResizing) return;
+    e.preventDefault();
+    const touch = e.touches[0];
+    moveResize(touch.clientX);
+}, { passive: false });
+
+document.addEventListener('touchend', endResize);

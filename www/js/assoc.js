@@ -154,19 +154,59 @@
         });
     });
 
-    // 导出数据
-    exportBtn.addEventListener('click', () => {
+    // 导出数据（【核心修改】适配平板原生分享）
+        // 导出数据（适配平板原生分享）
+    exportBtn.addEventListener('click', async () => {
         const dataStr = JSON.stringify(assocData, null, 2);
-        const blob = new Blob([dataStr], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
+        const fileName = `assoc_wordlist_${new Date().toISOString().slice(0,10)}.json`;
         
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `assoc_wordlist_${new Date().toISOString().slice(0,10)}.json`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
+        // 安全获取全局 Capacitor 对象
+        const capacitor = window.Capacitor;
+        const isNative = capacitor && capacitor.isNativePlatform && capacitor.isNativePlatform();
+        
+        if (isNative && capacitor.Plugins && capacitor.Plugins.Filesystem && capacitor.Plugins.Share) {
+            // ===== 安卓原生 App 环境 =====
+            try {
+                const Filesystem = capacitor.Plugins.Filesystem;
+                const Share = capacitor.Plugins.Share;
+                
+                // 1. 把文件写入 App 的缓存目录
+                // 注意：直接用字符串 'CACHE' 替代 Directory.Cache，用 'utf8' 替代 Encoding.UTF8
+                const result = await Filesystem.writeFile({
+                    path: fileName,
+                    data: dataStr,
+                    directory: 'CACHE', 
+                    encoding: 'utf8'
+                });
+                
+                // 2. 调起安卓系统底层的分享菜单
+                await Share.share({
+                    title: '导出联想词库',
+                    text: '这是我的盲拧联想词库备份文件',
+                    url: result.uri,
+                    dialogTitle: '保存或分享备份文件'
+                });
+            } catch (e) {
+                console.error("导出失败:", e);
+                alert("原生导出失败: " + e.message);
+            }
+        } else {
+            // ===== PC 浏览器 或 插件未加载环境 =====
+            try {
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert("导出失败，当前环境不支持直接下载。");
+            }
+        }
     });
 
     // 导入数据

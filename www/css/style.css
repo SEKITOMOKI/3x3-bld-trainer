@@ -14,19 +14,24 @@ body {
 }
 
 /* 左侧 3D 练习区（利用 CSS 视觉左移，不影响 3D 内部坐标系） */
+#canvas-container {
+    position: absolute;
+    /* 改为绝对定位，防止 WebView 高度塌陷 */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+/* 左侧 3D 练习区（整体向左偏移，适配平板侧边栏） */
 .practice-area {
     position: absolute;
     top: 0;
-    left: -120px; /* 【核心】向左偏移 120px，你可以调整这个数值，比如 -150px 会更偏左 */
-    width: calc(100% + 120px); /* 补足偏移出来的右侧空间 */
+    left: -250px; /* 【核心】向左偏移 250px，你可以根据侧边栏最小宽度自行微调，比如 -200px 或 -300px */
+    width: calc(100% + 250px); /* 补足偏移出来的右侧空间，防止画布被裁切 */
     height: 100%;
     display: flex;
     flex-direction: column;
-}
-
-#canvas-container {
-    width: 100%;
-    height: 100%;
 }
 
 /* 底部按钮 */
@@ -91,16 +96,19 @@ button:hover {
     top: 0;
     right: 0;
     height: 100%;
-    width: 350px; /* 默认宽度，可拖动调整 */
+    width: 350px;
+    /* 默认宽度，可拖动调整 */
     background: white;
     box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column;
     padding: 30px 20px;
     box-sizing: border-box;
-    z-index: 100; /* 悬浮在魔方上方 */
+    z-index: 100;
+    /* 悬浮在魔方上方 */
     overflow-y: auto;
 }
+
 .sidebar h1 {
     font-size: 24px;
     color: #333;
@@ -184,40 +192,53 @@ button:hover {
     border-radius: 8px;
     padding: 15px;
 }
+
 .note-panel h3 {
     margin: 0 0 15px 0;
-    font-size: 18px; /* 从 15px 调大到 18px */
+    font-size: 18px;
+    /* 从 15px 调大到 18px */
     color: #333;
 }
+
 .note-item {
     display: flex;
     align-items: flex-start;
     margin-bottom: 12px;
 }
+
 .note-item label {
-    width: 45px; /* 稍微加宽以对齐变大的字号 */
-    font-size: 16px; /* 从 14px 调大到 16px */
+    width: 45px;
+    /* 稍微加宽以对齐变大的字号 */
+    font-size: 16px;
+    /* 从 14px 调大到 16px */
     font-weight: bold;
     color: #555;
-    margin-top: 10px; /* 与输入框对齐 */
+    margin-top: 10px;
+    /* 与输入框对齐 */
 }
+
 .note-item textarea {
     flex: 1;
-    height: 45px; /* 从 36px 调大，方便容纳更大字体 */
+    height: 45px;
+    /* 从 36px 调大，方便容纳更大字体 */
     padding: 8px 10px;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-family: monospace;
-    font-size: 16px; /* 从 14px 调大到 16px */
+    font-size: 16px;
+    /* 从 14px 调大到 16px */
     resize: none;
     outline: none;
     transition: border 0.2s;
 }
+
 .note-item textarea:focus {
     border-color: #2196F3;
 }
+
 .note-item textarea::placeholder {
-    font-size: 14px; /* 占位符字体稍微小一点，防止超出 */
+    font-size: 14px;
+    /* 占位符字体稍微小一点，防止超出 */
     color: #aaa;
 }
 
@@ -232,6 +253,7 @@ button:hover {
     border-radius: 8px;
     padding: 15px;
 }
+
 .wordlist-panel summary {
     cursor: pointer;
     font-weight: bold;
@@ -242,25 +264,34 @@ button:hover {
     align-items: center;
     user-select: none;
 }
-.wordlist-panel summary::-webkit-details-marker { display: none; }
+
+.wordlist-panel summary::-webkit-details-marker {
+    display: none;
+}
+
 .wordlist-panel summary::after {
     content: '▾';
     margin-left: auto;
     color: #888;
     transition: transform 0.2s;
 }
-.wordlist-panel[open] summary::after { transform: rotate(180deg); }
+
+.wordlist-panel[open] summary::after {
+    transform: rotate(180deg);
+}
 
 /* 修复：确保搜索框容器宽度正常 */
-.wl-tools { 
-    margin-top: 15px; 
-    width: 100%; /* 确保容器占满宽度 */
-    box-sizing: border-box; 
+.wl-tools {
+    margin-top: 15px;
+    width: 100%;
+    /* 确保容器占满宽度 */
+    box-sizing: border-box;
 }
 
 .wl-tools input {
     width: 100%;
-    box-sizing: border-box; /* 关键：让 padding 包含在宽度内 */
+    box-sizing: border-box;
+    /* 关键：让 padding 包含在宽度内 */
     padding: 8px 10px;
     border: 1px solid #ddd;
     border-radius: 6px;
@@ -270,8 +301,8 @@ button:hover {
     transition: border-color 0.2s;
 }
 
-.wl-tools input:focus { 
-    border-color: #2196F3; 
+.wl-tools input:focus {
+    border-color: #2196F3;
 }
 
 /* 【新增】格式说明文字样式 */
@@ -291,8 +322,15 @@ button:hover {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
-.wl-grid::-webkit-scrollbar { width: 6px; }
-.wl-grid::-webkit-scrollbar-thumb { background: #ccc; border-radius: 3px; }
+
+.wl-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wl-grid::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
 
 .wl-item {
     display: flex;
@@ -306,16 +344,19 @@ button:hover {
     font-size: 14px;
     transition: all 0.15s;
 }
+
 .wl-item:hover {
     border-color: #2196F3;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.1);
 }
+
 .wl-key {
     font-weight: bold;
     color: #2196F3;
     font-family: monospace;
     margin-right: 6px;
 }
+
 .wl-word {
     color: #555;
     overflow: hidden;
@@ -323,6 +364,7 @@ button:hover {
     white-space: nowrap;
     text-align: right;
 }
+
 .wl-empty {
     grid-column: span 2;
     text-align: center;
@@ -330,11 +372,13 @@ button:hover {
     font-size: 13px;
     padding: 10px 0;
 }
+
 .wl-footer {
     display: flex;
     gap: 10px;
     margin-top: 12px;
 }
+
 .wl-footer button {
     flex: 1;
     padding: 8px;
@@ -347,7 +391,10 @@ button:hover {
     color: #333;
     transition: background 0.2s;
 }
-.wl-footer button:hover { background: #e9ecef; }
+
+.wl-footer button:hover {
+    background: #e9ecef;
+}
 
 
 /* 【新增】联想词编辑框样式 */
@@ -360,25 +407,36 @@ button:hover {
     font-family: monospace;
     font-size: 14px;
     outline: none;
-    text-align: right; /* 匹配原来文字的右对齐 */
+    text-align: right;
+    /* 匹配原来文字的右对齐 */
     background: #fff;
     box-shadow: 0 0 0 2px rgba(33, 150, 243, 0.15);
 }
 
 
-/* 【修改】侧边栏拖拽条样式（左侧吸附） */
+/* 【修改】侧边栏拖拽条样式（独立悬浮） */
 .resizer {
     position: absolute;
-    left: -5px; /* 向左延伸出侧边栏一半宽度，方便抓取 */
     top: 0;
-    width: 10px;
+    bottom: 0; /* 关键：同时设置 top 和 bottom，使其撑满全屏高度 */
+    right: 350px; /* 默认与sidebar宽度对齐，宽度由JS动态控制 */
+    width: 30px; /* 扩宽触摸区域，方便手指拖动 */
+    z-index: 999;
+    cursor: col-resize;
+    touch-action: none; /* 阻止浏览器默认的滚动和缩放行为 */
+    display: flex;
+    justify-content: center;
+}
+
+/* 视觉上的细线 */
+.resizer::after {
+    content: '';
+    width: 6px;
     height: 100%;
     background: #e2e8f0;
-    cursor: col-resize;
-    z-index: 101; /* 比侧边栏更高，确保能抓到 */
     transition: background 0.2s;
 }
 
-.resizer:hover, .resizer.active {
+.resizer:hover::after, .resizer.active::after {
     background: #2196F3;
 }

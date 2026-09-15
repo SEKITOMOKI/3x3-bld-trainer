@@ -1,0 +1,29 @@
+# Node.js 依赖
+node_modules/
+
+# Capacitor 原生项目构建产物
+android/app/build/
+android/build/
+android/.gradle/
+android/.idea/
+android/local.properties
+android/captures/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+android/app/src/main/assets/capacitor.plugins.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# IDE 配置
+.vscode/
+.idea/
+
+# 日志
+*.log
+npm-debug.log*
+
+# APK 构建产物
+*.apk
+*.aab
