@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>公式演示 - 3D 虚拟魔方</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #f0f0f0; display: flex; }
+        #canvas-container { flex: 1; height: 100vh; position: relative; }
+        
+        /* 顶部公式信息（加宽版） */
+        #top-info {
+            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.95); padding: 20px 30px; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); text-align: center; pointer-events: none; 
+            z-index: 10; width: 80%; max-width: 800px; /* 调宽面板 */
+        }
+        #top-info h2 { margin: 0 0 10px 0; font-size: 24px; color: #333; }
+        
+        /* 【核心修改】大幅调大公式字体 */
+        .formula-line { 
+            font-size: 26px; /* 从 15px 提升到 26px */
+            margin: 10px 0; 
+            font-family: monospace; 
+            line-height: 1.6; 
+            letter-spacing: 1px; /* 字母间距稍微拉大，更清晰 */
+        }
+        .formula-label { color: #333; font-weight: bold; font-family: sans-serif; }
+        #forwardFormula { color: #2196F3; font-weight: bold; }
+
+        /* 底部按钮区 */
+        #ui {
+            position: absolute; bottom: 30px; width: 100%; left: 0; text-align: center;
+            display: flex; flex-direction: column; align-items: center; gap: 10px; pointer-events: none;
+        }
+        .controls-row { display: flex; gap: 10px; pointer-events: auto; }
+        button { padding: 12px 24px; font-size: 16px; cursor: pointer; border-radius: 6px; border: 1px solid #ccc; background: #fff; transition: background 0.2s; font-weight: bold;}
+        button:hover { background: #e0e0e0; }
+        #playBtn { background:#4CAF50; color:white; border-color:#4CAF50; }
+        #playBtn:hover { background:#45a049; }
+
+        /* 右侧边栏 */
+        #sidebar {
+            width: 250px; height: 100vh; background: white; box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; padding: 20px; box-sizing: border-box; z-index: 20;
+        }
+        #sidebar h3 { margin: 0 0 15px 0; color: #333; font-size: 18px; }
+        .sidebar-btn {
+            display: block; padding: 12px; margin-bottom: 8px; background: #f5f5f5; color: #333;
+            text-decoration: none; border-radius: 6px; text-align: center; font-size: 15px;
+            transition: all 0.2s; border: 1px solid #ddd; font-weight: bold;
+        }
+        .sidebar-btn:hover { background: #e0e0e0; }
+        .sidebar-btn.active { background: #2196F3; color: white; border-color: #2196F3; }
+        .sidebar-back { margin-top: auto; background: #9E9E9E; color: white; border-color: #9E9E9E; }
+        .sidebar-back:hover { background: #757575; }
+    </style>
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
+</head>
+<body>
+    <!-- 左侧 3D 渲染区 -->
+    <div id="canvas-container">
+        <div id="top-info">
+            <h2 id="formulaTitle">公式演示</h2>
+            <p class="formula-line"><span class="formula-label">公式：</span><span id="forwardFormula"></span></p>
+        </div>
+        <div id="ui">
+            <div class="controls-row">
+                <button id="playBtn">正放演示</button>
+                <button id="pauseBtn">暂停</button>
+                <button id="resetBtn">重置魔方</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧边栏 -->
+    <div id="sidebar">
+        <h3 id="sidebarTitle">其他公式</h3>
+        <div id="sidebarList" style="flex: 1; overflow-y: auto; padding-right: 5px;"></div>
+        <a href="index.html" class="sidebar-btn sidebar-back">返回主页</a>
+    </div>
+
+    <script src="js/data.js"></script>
+    <script type="module" src="js/formula.js"></script>
+</body>
+</html>

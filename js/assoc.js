@@ -1,0 +1,213 @@
+/* ============================================================
+ *  个人联想词库逻辑 (Search, Edit, Import, Export)
+ *  支持兼容旧版训练器的完整备份数据
+ * ============================================================ */
+(function () {
+    'use strict';
+
+    const STORAGE_KEY = 'cube_assoc_wordlist_v1';
+
+    // 默认词库数据（空对象）
+    let assocData = {};
+
+    // DOM 元素
+    const $ = id => document.getElementById(id);
+    const searchInput = $('assocSearch');
+    const grid = $('assocGrid');
+    const exportBtn = $('assocExportBtn');
+    const importBtn = $('assocImportBtn');
+
+    // --- 工具函数 ---
+    function esc(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    // 数据格式转换：兼容旧版备份的嵌套结构
+    function normalizeData(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return {};
+
+        if (data.entries && typeof data.entries === 'object') {
+            const cleaned = {};
+            for (const key in data.entries) {
+                const entry = data.entries[key];
+                if (entry && typeof entry.word === 'string' && entry.word.trim() !== '') {
+                    cleaned[key] = entry.word.trim();
+                }
+            }
+            return cleaned;
+        }
+
+        const cleaned = {};
+        for (const key in data) {
+            if (typeof data[key] === 'string' && data[key].trim() !== '') {
+                cleaned[key] = data[key].trim();
+            }
+        }
+        return cleaned;
+    }
+
+    // --- 持久化操作 ---
+    function loadData() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                assocData = normalizeData(parsed);
+            }
+        } catch (e) {
+            console.error("加载联想词库失败:", e);
+        }
+    }
+
+    function saveData() {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(assocData));
+        } catch (e) {
+            console.error("保存联想词库失败:", e);
+            alert("保存失败，可能是浏览器存储空间不足。");
+        }
+    }
+
+    // --- 渲染逻辑 ---
+    function render(filterText = '') {
+        const q = filterText.trim().toUpperCase();
+        
+        const items = Object.keys(assocData).filter(key => {
+            const word = assocData[key];
+            return key.includes(q) || word.toUpperCase().includes(q);
+        });
+
+        if (items.length === 0) {
+            grid.innerHTML = '<div class="wl-empty">暂无记录，快去建立你的联想词库吧！</div>';
+            return;
+        }
+
+        grid.innerHTML = items.map(key => {
+            const word = assocData[key];
+            return `
+                <div class="wl-item" data-key="${esc(key)}" title="点击修改联想词">
+                    <span class="wl-key">${esc(key)}</span>
+                    <span class="wl-word">${esc(word)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // --- 事件绑定 ---
+
+    // 搜索
+    searchInput.addEventListener('input', (e) => {
+        render(e.target.value);
+    });
+
+    // 点击词条进入编辑模式
+    grid.addEventListener('click', (e) => {
+        const item = e.target.closest('.wl-item');
+        if (!item || item.querySelector('.wl-edit-input')) return; // 已经处于编辑状态则忽略
+
+        const key = item.dataset.key;
+        const oldWord = assocData[key];
+        const wordSpan = item.querySelector('.wl-word');
+
+        // 创建输入框替换文字
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'wl-edit-input';
+        input.value = oldWord;
+
+        wordSpan.replaceWith(input);
+        input.focus();
+        input.select(); // 自动全选文字，方便直接覆盖输入
+
+        // 失焦（点击其他地方）保存
+        input.addEventListener('blur', () => {
+            const newWord = input.value.trim();
+            
+            if (newWord === '') {
+                if (confirm(`确定要清空 [${key}] 的联想词吗？`)) {
+                    delete assocData[key];
+                    saveData();
+                    render(searchInput.value);
+                } else {
+                    render(searchInput.value); // 取消清空，恢复原样
+                }
+            } else if (newWord !== oldWord) {
+                assocData[key] = newWord;
+                saveData();
+                render(searchInput.value);
+            } else {
+                render(searchInput.value); // 没变化，恢复原样
+            }
+        });
+
+        // 处理回车和ESC
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                input.blur();
+            } else if (e.key === 'Escape') {
+                // 直接替换回原来的文字 span，不触发保存逻辑
+                input.replaceWith(wordSpan);
+            }
+        });
+    });
+
+    // 导出数据
+    exportBtn.addEventListener('click', () => {
+        const dataStr = JSON.stringify(assocData, null, 2);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `assoc_wordlist_${new Date().toISOString().slice(0,10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+    });
+
+    // 导入数据
+    importBtn.addEventListener('click', () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+
+        input.onchange = e => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                try {
+                    const imported = JSON.parse(reader.result);
+                    const cleaned = normalizeData(imported);
+                    
+                    if (Object.keys(cleaned).length === 0) {
+                        alert("导入失败：文件里没有找到有效的联想词数据。");
+                        return;
+                    }
+
+                    if (confirm(`检测到 ${Object.keys(cleaned).length} 条联想词，导入将覆盖当前记录，确定继续吗？`)) {
+                        assocData = cleaned;
+                        saveData();
+                        render(searchInput.value);
+                        alert("导入成功！");
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert("导入失败：文件不是有效的 JSON 数据。");
+                }
+            };
+            reader.readAsText(file);
+        };
+        input.click();
+    });
+
+    // --- 初始化 ---
+    loadData();
+    render();
+
+})();
