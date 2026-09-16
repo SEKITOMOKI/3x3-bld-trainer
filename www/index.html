@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>三阶盲拧新手练习平台</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- 引入 WCA 官方打乱生成库 -->
+    <!-- 引入 WCA 官方打乱生成库 (如果本地已完全取代，可保持注释) -->
     <!-- <script src="https://cdn.cubing.net/v0/js/cubing/twisty" type="module"></script> -->
     <script type="importmap">
         {
@@ -28,21 +28,25 @@
                     <span id="scrambleText">等待打乱...</span>
                 </div>
             </div>
+            
+            <!-- 【修复】删除了重复嵌套的 <div id="ui">，确保按钮定位正确 -->
             <div id="ui">
                 <div class="controls-row">
                     <button id="toggleLetterBtn" class="btn-green">显示编码</button>
-                    <button id="scrambleBtn" class="btn-blue">WCA打乱</button>
-                    <button id="resetBtn">复原魔方</button>
-                    <button id="toggleCubeBtn">隐藏魔方</button>
+                    <button id="scrambleBtn" class="btn-blue">打乱</button>
+                    <button id="focusCornerBtn" class="btn-purple">角块</button>
+                    <button id="focusEdgeBtn" class="btn-orange">棱块</button>
+                    <button id="resetBtn">复原</button>
+                    <button id="toggleCubeBtn">隐藏</button>
                 </div>
             </div>
         </main>
-        <!-- 【修改】拖拽条移出 sidebar，防止被滚动条裁剪 -->
+
+        <!-- 拖拽条，用于调整侧边栏宽度 -->
         <div class="resizer" id="dragMe"></div>
 
         <!-- 右侧导航菜单与笔记区 -->
         <aside class="sidebar">
-
             <!-- <h1>三阶盲拧<br>新手练习平台</h1> -->
             <div class="menu-list">
                 <a href="category.html?type=corner" class="menu-btn">角块公式 <span>18条</span></a>
@@ -68,7 +72,7 @@
                 </div>
             </div>
 
-            <!-- 【新增】个人联想词库面板 -->
+            <!-- 个人联想词库面板 -->
             <details class="wordlist-panel">
                 <summary>📖 个人联想词库</summary>
                 <div class="wl-tools">
@@ -80,16 +84,18 @@
                     <button id="assocImportBtn">导入备份</button>
                 </div>
                 <div class="wl-format-tip">支持导入/导出 JSON 格式文件 (.json)</div>
-
             </details>
-
         </aside>
+
+        <!-- 【新增】书签按钮（必须在 sidebar 外面，当 sidebar 隐藏时它依然可见可点击） -->
+        <div id="sidebarHandle"
+            style="display: none; position: fixed; right: 0; top: 50%; transform: translateY(-50%); background: #2196F3; color: white; padding: 15px 8px; border-radius: 10px 0 0 10px; cursor: pointer; z-index: 1000; font-size: 13px; font-weight: bold; box-shadow: -2px 0 8px rgba(0,0,0,0.2); writing-mode: vertical-rl; letter-spacing: 2px; transition: all 0.2s;">
+            工具</div>
     </div>
 
     <!-- 引入主要逻辑（3D魔方与打乱） -->
     <script type="module" src="js/main.js"></script>
-
-    <!-- 【确保这行在 assoc.js 之前或同时存在】如果使用了模块化打包，可能需要调整，但通常 Capacitor 会自动注入全局变量 -->
+    <!-- 引入联想词库逻辑 -->
     <script src="js/assoc.js"></script>
 </body>
 

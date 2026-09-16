@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-// 在所有代码最前面加上这行，防止某个元素找不到导致全局崩溃
+// 全局错误捕捉
 window.onerror = function(msg, url, line) {
     console.error("全局报错:", msg, "行号:", line);
     return false;
@@ -9,13 +9,11 @@ window.onerror = function(msg, url, line) {
 
 // ================= 1. 基础场景设置 =================
 const container = document.getElementById('canvas-container');
-if (!container) {
-    console.error("找不到 id 为 'canvas-container' 的元素，请检查 index.html！");
-}
+if (!container) console.error("找不到 id 为 'canvas-container' 的元素！");
 
 container.style.width = '100%';
 container.style.height = '100%';
-let width = container.clientWidth || (window.innerWidth - 300);
+let width = container.clientWidth || window.innerWidth;
 let height = container.clientHeight || window.innerHeight;
 
 const scene = new THREE.Scene();
@@ -44,15 +42,14 @@ controls.enablePan = false;
 const cubies = []; 
 const cubeSize = 0.95;
 let showLetters = false; 
+let focusMode = 'none'; 
 
 const colors = {
-    up: 0xffff00,    // 黄 (+y)
-    down: 0xffffff,  // 白 (-y)
-    front: 0xff0000, // 红 (+z)
-    back: 0xffa500,  // 橙 (-z)
-    right: 0x00ff00, // 绿 (+x)
-    left: 0x0000ff   // 蓝 (-x)
+    up: 0xffff00, down: 0xffffff, front: 0xff0000,
+    back: 0xffa500, right: 0x00ff00, left: 0x0000ff
 };
+
+const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
 
 const letterMaps = {
     U: [['D', 'E', 'G'], ['C', '', 'G'], ['*', '*', 'J']], 
@@ -112,18 +109,13 @@ function createCubie(x, y, z) {
     return group;
 }
 
-// 【新增】创建一个组，用于整体平移魔方
 const cubeGroup = new THREE.Group();
-
 for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
     if (x === 0 && y === 0 && z === 0) continue;
     const cubie = createCubie(x, y, z); 
     cubeGroup.add(cubie); 
     cubies.push(cubie);
 }
-
-// 【核心调整】魔方整体向左偏移
-// 【重置】物理层面完全居中，保证旋转手感完美
 cubeGroup.position.x = 0;
 controls.target.set(0, 0, 0); 
 controls.update();
@@ -135,11 +127,8 @@ function parseFormula(formula) {
     const cleanFormula = formula.replace(/[()\s]/g, '');
     const regex = /([RLUDFBrxyz])(2|')?/g;
     let match;
-    
     while ((match = regex.exec(cleanFormula)) !== null) {
-        const face = match[1]; 
-        const modifier = match[2];
-        
+        const face = match[1]; const modifier = match[2];
         let baseMoves = [];
         switch(face) {
             case 'R': baseMoves = [{axis: 'x', layers: [1], dir: -1}]; break;
@@ -153,7 +142,6 @@ function parseFormula(formula) {
             case 'y': baseMoves = [{axis: 'y', layers: [1, 0, -1], dir: -1}]; break;
             case 'z': baseMoves = [{axis: 'z', layers: [1, 0, -1], dir: -1}]; break;
         }
-
         let finalMoves = [];
         baseMoves.forEach(move => {
             let dir = move.dir;
@@ -184,7 +172,6 @@ function executeRotationInstant(axis, layers, direction) {
         else if (axis === 'z') { if (direction === 1) { nX = -y; nY = x; } else { nX = y; nY = -x; } }
         cubie.userData.x = nX; cubie.userData.y = nY; cubie.userData.z = nZ;
     });
-
     const pivot = new THREE.Group();
     scene.add(pivot);
     targetCubies.forEach(cubie => pivot.attach(cubie));
@@ -230,7 +217,6 @@ function queueRotation(axis, layers, direction, duration = 300) {
 function executeRotation(axis, layers, direction, duration) {
     isAnimating = true;
     const targetCubies = cubies.filter(c => layers.includes(c.userData[axis]));
-
     targetCubies.forEach(cubie => {
         let { x, y, z } = cubie.userData;
         let nX = x, nY = y, nZ = z;
@@ -239,27 +225,21 @@ function executeRotation(axis, layers, direction, duration) {
         else if (axis === 'z') { if (direction === 1) { nX = -y; nY = x; } else { nX = y; nY = -x; } }
         cubie.userData.x = nX; cubie.userData.y = nY; cubie.userData.z = nZ;
     });
-
     const pivot = new THREE.Group();
     scene.add(pivot);
     targetCubies.forEach(cubie => pivot.attach(cubie));
-
     const targetAngle = direction * Math.PI / 2;
     let elapsed = 0;
     let lastTime = performance.now();
-
     function animateRotation() {
         const now = performance.now();
         elapsed += now - lastTime;
         lastTime = now;
-
         const progress = Math.min(elapsed / duration, 1);
         const currentAngle = targetAngle * (progress * (2 - progress));
-
         if (axis === 'x') pivot.rotation.x = currentAngle;
         if (axis === 'y') pivot.rotation.y = currentAngle;
         if (axis === 'z') pivot.rotation.z = currentAngle;
-
         if (progress >= 1) {
             targetCubies.forEach(cubie => {
                 scene.attach(cubie);
@@ -276,9 +256,9 @@ function executeRotation(axis, layers, direction, duration) {
 }
 
 // ================= 5. 交互按钮逻辑 =================
+let currentScrambleState = 0; 
 let isScrambling = false;
-let lastScramble = ''; 
-let scrambleState = 0; // 0: 打乱; 1: 显示公式; 2: 隐藏公式
+let lastScramble = '';
 
 function resetCubeState() {
     animationQueue.length = 0;
@@ -300,78 +280,86 @@ function generateLocalScramble() {
     const modifiers = ['', "'", '2'];
     let scrambleStr = '';
     let lastFace = '';
-    
     for (let i = 0; i < 20; i++) {
         let face;
-        do {
-            face = faces[Math.floor(Math.random() * 6)];
-        } while (face === lastFace);
+        do { face = faces[Math.floor(Math.random() * faces.length)]; } while (face === lastFace);
         lastFace = face;
-        
         const mod = modifiers[Math.floor(Math.random() * 3)];
         scrambleStr += face + mod + ' ';
-        
         const parsed = parseFormula(face + mod);
-        parsed.forEach(step => {
-            queueRotation(step.axis, step.layers, step.direction, 30);
-        });
+        parsed.forEach(step => { queueRotation(step.axis, step.layers, step.direction, 30); });
     }
-    
     return scrambleStr.trim();
 }
 
-// 初始化：页面加载时，魔方物理状态为黄顶红前
-resetCubeState();
+function applyVisibility() {
+    cubies.forEach(cubie => {
+        const x = cubie.userData.x; const y = cubie.userData.y; const z = cubie.userData.z;
+        const sum = Math.abs(x) + Math.abs(y) + Math.abs(z);
+        const isCorner = (sum === 3); const isEdge = (sum === 2);
+        let showThisCubie = true;
+        if (focusMode === 'corner' && isEdge) showThisCubie = false;
+        if (focusMode === 'edge' && isCorner) showThisCubie = false;
+        cubie.children.forEach(child => {
+            if (child.userData && child.userData.isSticker) {
+                child.material = !showThisCubie ? blackMaterial : (showLetters ? child.userData.matWithLetter : child.userData.matNoLetter);
+            }
+        });
+    });
+}
 
-document.getElementById('scrambleBtn').addEventListener('click', () => {
+document.getElementById('scrambleBtn').addEventListener('click', function() {
     const displayEl = document.getElementById('scramble-display');
-    const scrambleBtn = document.getElementById('scrambleBtn');
-
-    if (scrambleState === 0) {
-        // 状态0：执行打乱，公式隐藏，按钮变为“显示打乱公式”
+    if (currentScrambleState === 0) {
         resetCubeState();
         rotateToWhiteGreen(); 
-
-        displayEl.style.display = 'none';
-        
         lastScramble = generateLocalScramble();
-        console.log("白顶绿前打乱序列:", lastScramble);
-
         isScrambling = true;
-        
-        // 打乱时自动清空笔记
+        currentScrambleState = 1;
+        displayEl.style.display = 'none';
         document.getElementById('noteCorner').value = '';
         document.getElementById('noteEdge').value = '';
         document.getElementById('noteFlip').value = '';
-
-        scrambleState = 1;
-        scrambleBtn.textContent = '显示打乱公式';
-    } else if (scrambleState === 1) {
-        // 状态1：用户点击显示公式，按钮变为“隐藏打乱公式”
+        this.textContent = '显示打乱公式';
+    } else if (currentScrambleState === 1) {
         document.getElementById('scrambleText').textContent = "白顶绿前打乱: " + lastScramble;
         displayEl.style.display = 'block';
-        
-        scrambleState = 2;
-        scrambleBtn.textContent = '隐藏打乱公式';
+        this.textContent = '隐藏打乱公式';
+        currentScrambleState = 2;
     } else {
-        // 状态2：用户再次点击，公式隐藏，按钮变回“显示打乱公式”
         displayEl.style.display = 'none';
-        
-        scrambleState = 1;
-        scrambleBtn.textContent = '显示打乱公式';
+        this.textContent = '显示打乱公式';
+        currentScrambleState = 1;
     }
+});
+
+document.getElementById('focusCornerBtn').addEventListener('click', function() {
+    if (focusMode === 'corner') { focusMode = 'none'; this.textContent = '角块'; this.style.background = '#9C27B0'; }
+    else { focusMode = 'corner'; this.textContent = '取消角块专注'; this.style.background = '#f44336'; }
+    const edgeBtn = document.getElementById('focusEdgeBtn');
+    edgeBtn.textContent = '棱块'; edgeBtn.style.background = '#FF9800';
+    applyVisibility();
+});
+
+document.getElementById('focusEdgeBtn').addEventListener('click', function() {
+    if (focusMode === 'edge') { focusMode = 'none'; this.textContent = '棱块'; this.style.background = '#FF9800'; }
+    else { focusMode = 'edge'; this.textContent = '取消棱块专注'; this.style.background = '#f44336'; }
+    const cornerBtn = document.getElementById('focusCornerBtn');
+    cornerBtn.textContent = '角块'; cornerBtn.style.background = '#9C27B0';
+    applyVisibility();
 });
 
 document.getElementById('resetBtn').addEventListener('click', () => {
     resetCubeState();
-    const displayEl = document.getElementById('scramble-display');
-    displayEl.style.display = 'none';
-    
-    // 复原魔方后，按钮文字变回“WCA打乱”，方便下一次打乱
-    scrambleState = 0;
-    document.getElementById('scrambleBtn').textContent = 'WCA打乱';
-
-    // 复原时也清空笔记
+    document.getElementById('scramble-display').style.display = 'none';
+    currentScrambleState = 0;
+    document.getElementById('scrambleBtn').textContent = '打乱';
+    focusMode = 'none';
+    document.getElementById('focusCornerBtn').textContent = '角块';
+    document.getElementById('focusCornerBtn').style.background = '#9C27B0';
+    document.getElementById('focusEdgeBtn').textContent = '棱块';
+    document.getElementById('focusEdgeBtn').style.background = '#FF9800';
+    applyVisibility();
     document.getElementById('noteCorner').value = '';
     document.getElementById('noteEdge').value = '';
     document.getElementById('noteFlip').value = '';
@@ -382,29 +370,56 @@ document.getElementById('toggleLetterBtn').addEventListener('click', (e) => {
     e.target.textContent = showLetters ? '隐藏编码' : '显示编码';
     e.target.style.background = showLetters ? '#f44336' : '#4CAF50';
     e.target.style.borderColor = showLetters ? '#f44336' : '#4CAF50';
-
-    cubies.forEach(cubie => {
-        cubie.children.forEach(child => {
-            if (child.userData && child.userData.isSticker) {
-                child.material = showLetters ? child.userData.matWithLetter : child.userData.matNoLetter;
-            }
-        });
-    });
+    applyVisibility();
 });
 
-// 隐藏/显示魔方按钮逻辑
 let isCubeVisible = true;
 document.getElementById('toggleCubeBtn').addEventListener('click', (e) => {
     isCubeVisible = !isCubeVisible;
-    cubies.forEach(cubie => {
-        cubie.visible = isCubeVisible;
-    });
-    e.target.textContent = isCubeVisible ? '隐藏魔方' : '显示魔方';
+    cubies.forEach(cubie => { cubie.visible = isCubeVisible; });
+    e.target.textContent = isCubeVisible ? '隐藏' : '显示';
     e.target.style.background = isCubeVisible ? '#fff' : '#f44336'; 
     e.target.style.color = isCubeVisible ? '#333' : 'white';
 });
 
-// ================= 6. 渲染循环 =================
+// ================= 6. 笔记输入自动格式化 =================
+// 自动在每两个字母后添加空格，方便字母对联想记忆（完美兼容删除键）
+function formatNoteInput(inputElement, event) {
+    // 【核心修复】如果输入类型是删除操作，直接返回，不进行任何格式化，让用户顺利删除
+    if (event && event.inputType && event.inputType.includes('delete')) {
+        return;
+    }
+
+    // 移除非字母字符，转大写
+    let rawValue = inputElement.value.replace(/[^A-Za-z]/g, '').toUpperCase();
+    
+    // 如果用户全部删除，则清空
+    if (rawValue.length === 0) {
+        inputElement.value = '';
+        return;
+    }
+    
+    // 每两个字符插入一个空格
+    let formattedValue = '';
+    for (let i = 0; i < rawValue.length; i += 2) {
+        formattedValue += rawValue.substring(i, i + 2) + ' ';
+    }
+    
+    // 设置回输入框
+    inputElement.value = formattedValue;
+}
+
+// 为“角”和“棱”输入框绑定自动格式化事件
+['noteCorner', 'noteEdge'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+        el.addEventListener('input', function(e) {
+            formatNoteInput(this, e); // 把事件对象 e 传进去
+        });
+    }
+});
+
+// ================= 7. 渲染循环 =================
 function animate() {
     requestAnimationFrame(animate);
     controls.update();
@@ -412,74 +427,140 @@ function animate() {
 }
 animate();
 
-window.addEventListener('resize', () => {
-    // 动态计算左侧画布宽度，而不是写死 -300
+// ================= 8. 自适应布局逻辑 =================
+function updateLayout() {
     const sidebarEl = document.querySelector('.sidebar');
-    const sidebarWidth = sidebarEl ? sidebarEl.clientWidth : 300;
-    const w = container.clientWidth || (window.innerWidth - sidebarWidth);
-    const h = container.clientHeight || window.innerHeight;
+    const sidebarWidth = sidebarEl ? sidebarEl.clientWidth : 0;
+    const practiceArea = document.querySelector('.practice-area');
+    const displayEl = document.getElementById('scramble-display');
+    const resizerEl = document.getElementById('dragMe'); // 获取拖拽条
+
+    // 如果侧边栏隐藏，宽度视为 0；否则减去侧边栏宽度
+    let w = window.innerWidth - sidebarWidth;
+    if (w < 100) w = window.innerWidth; 
+    let h = window.innerHeight;
+
+    if (practiceArea) {
+        practiceArea.style.width = w + 'px';
+        practiceArea.style.left = '0px';
+    }
+
+    // 【核心修复】同步拖拽条的位置到侧边栏左侧边缘
+    // 只要侧边栏不是隐藏状态，拖拽条就必须紧贴它的左边
+    if (resizerEl && sidebarEl && sidebarEl.style.display !== 'none') {
+        resizerEl.style.right = sidebarWidth + 'px';
+    }
+
+    const baseWidth = 800; 
+    const baseDistance = 8.2; 
+    const scaleFactor = baseWidth / w; 
+    const finalScale = Math.max(0.8, Math.min(1.5, scaleFactor)); 
+    const d = baseDistance * finalScale;
+    
+    const dir = new THREE.Vector3(4, 4, 6).normalize();
+    camera.position.copy(dir.multiplyScalar(d));
+
+    cubeGroup.position.x = 0;
+    controls.target.set(0, 0, 0);
+
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
     renderer.setSize(w, h);
-});
+    controls.update();
 
-
-// ================= 7. 侧边栏拖拽调整宽度逻辑（适配平板触摸） =================
-const resizer = document.getElementById('dragMe');
-const sidebar = document.querySelector('.sidebar');
-
-let isResizing = false;
-
-function startResize(clientX) {
-    isResizing = true;
-    resizer.classList.add('active');
-    document.body.style.userSelect = 'none';
-}
-
-function moveResize(clientX) {
-    if (!isResizing) return;
-    
-    // 计算新宽度
-    const newWidth = window.innerWidth - clientX;
-    const maxWidth = window.innerWidth - 100; // 左侧至少保留 100px
-    
-    if (newWidth > 200 && newWidth < maxWidth) {
-        sidebar.style.width = newWidth + 'px';
-        // 【核心修复】同步更新拖拽条的 right 属性
-        resizer.style.right = newWidth + 'px';
+    if (displayEl) {
+        displayEl.style.left = '0px';
+        displayEl.style.top = '0px';
+        displayEl.style.transform = 'none';
+        displayEl.style.borderRadius = '0 0 10px 0';
+        displayEl.style.maxWidth = '100vw';
     }
 }
 
-function endResize() {
+// ================= 9. 侧边栏拖拽与折叠逻辑 =================
+const resizer = document.getElementById('dragMe');
+const sidebar = document.querySelector('.sidebar');
+const sidebarHandle = document.getElementById('sidebarHandle');
+
+let isResizing = false;
+let isSidebarCollapsed = false;
+let lastSidebarWidth = 350; // 默认宽度
+
+// 展开侧边栏
+function expandSidebar() {
+    isSidebarCollapsed = false;
+    sidebar.style.display = 'flex'; // 恢复显示
+    // 强制恢复到一个合理的宽度，防止之前被拖拽成极窄条
+    const targetWidth = (lastSidebarWidth && lastSidebarWidth > 250) ? lastSidebarWidth : 350;
+    sidebar.style.width = targetWidth + 'px';
+    sidebar.style.padding = '30px 20px';
+    sidebar.style.overflowY = 'auto';
+    sidebarHandle.style.display = 'none'; // 隐藏书签
+    resizer.style.display = 'block'; // 恢复拖拽条
+    
+    // 调用布局更新，自动把拖拽条对齐到侧边栏左侧
+    updateLayout();
+}
+
+// 折叠侧边栏
+function collapseSidebar() {
+    isSidebarCollapsed = true;
+    sidebar.style.display = 'none'; // 彻底隐藏
+    sidebarHandle.style.display = 'block'; // 显示书签
+    resizer.style.display = 'none'; // 隐藏拖拽条
+    updateLayout();
+}
+
+// 绑定书签点击
+if (sidebarHandle) sidebarHandle.addEventListener('click', expandSidebar);
+
+// 拖拽条逻辑
+resizer.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    isResizing = true;
+    resizer.classList.add('active');
+    resizer.setPointerCapture(e.pointerId);
+    document.body.style.userSelect = 'none';
+    lastSidebarWidth = sidebar.clientWidth; // 记录拖拽前的宽度
+});
+
+resizer.addEventListener('pointermove', (e) => {
+    if (!isResizing) return;
+    const newWidth = window.innerWidth - e.clientX;
+    const maxWidth = window.innerWidth - 100;
+    
+    // 正常拖拽范围
+    if (newWidth > 150 && newWidth < maxWidth) {
+        sidebar.style.width = newWidth + 'px';
+        resizer.style.right = newWidth + 'px'; // 实时同步拖拽条位置
+        updateLayout();
+    }
+});
+
+resizer.addEventListener('pointerup', (e) => {
     if (isResizing) {
         isResizing = false;
         resizer.classList.remove('active');
+        resizer.releasePointerCapture(e.pointerId);
         document.body.style.userSelect = '';
-        // 通知 Three.js 重新计算画布大小
-        window.dispatchEvent(new Event('resize'));
+        
+        // 松手时判断宽度，如果太窄，触发折叠
+        if (sidebar.clientWidth < 150) {
+            collapseSidebar();
+        } else {
+            lastSidebarWidth = sidebar.clientWidth; // 记录最终舒适宽度
+            updateLayout();
+        }
     }
-}
-
-// ---------- 鼠标事件 (PC) ----------
-resizer.addEventListener('mousedown', (e) => {
-    e.preventDefault();
-    startResize(e.clientX);
 });
-document.addEventListener('mousemove', (e) => moveResize(e.clientX));
-document.addEventListener('mouseup', endResize);
 
-// ---------- 触摸事件 (平板/手机) ----------
-resizer.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    const touch = e.touches[0];
-    startResize(touch.clientX);
-}, { passive: false });
-
-document.addEventListener('touchmove', (e) => {
-    if (!isResizing) return;
-    e.preventDefault();
-    const touch = e.touches[0];
-    moveResize(touch.clientX);
-}, { passive: false });
-
-document.addEventListener('touchend', endResize);
+resizer.addEventListener('pointercancel', (e) => {
+    if (isResizing) {
+        isResizing = false;
+        resizer.classList.remove('active');
+        resizer.releasePointerCapture(e.pointerId);
+        document.body.style.userSelect = '';
+        updateLayout();
+    }
+});
