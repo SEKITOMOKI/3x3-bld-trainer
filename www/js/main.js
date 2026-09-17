@@ -484,37 +484,30 @@ const sidebarHandle = document.getElementById('sidebarHandle');
 
 let isResizing = false;
 let isSidebarCollapsed = false;
-let lastSidebarWidth = 350; // 默认宽度
+let lastSidebarWidth = 350; 
 
-// 展开侧边栏
 function expandSidebar() {
     isSidebarCollapsed = false;
-    sidebar.style.display = 'flex'; // 恢复显示
-    // 强制恢复到一个合理的宽度，防止之前被拖拽成极窄条
+    sidebar.style.display = 'flex'; 
     const targetWidth = (lastSidebarWidth && lastSidebarWidth > 250) ? lastSidebarWidth : 350;
     sidebar.style.width = targetWidth + 'px';
     sidebar.style.padding = '30px 20px';
     sidebar.style.overflowY = 'auto';
-    sidebarHandle.style.display = 'none'; // 隐藏书签
-    resizer.style.display = 'block'; // 恢复拖拽条
-    
-    // 调用布局更新，自动把拖拽条对齐到侧边栏左侧
+    sidebarHandle.style.display = 'none'; 
+    resizer.style.display = 'block'; 
     updateLayout();
 }
 
-// 折叠侧边栏
 function collapseSidebar() {
     isSidebarCollapsed = true;
-    sidebar.style.display = 'none'; // 彻底隐藏
-    sidebarHandle.style.display = 'block'; // 显示书签
-    resizer.style.display = 'none'; // 隐藏拖拽条
+    sidebar.style.display = 'none'; 
+    sidebarHandle.style.display = 'block'; 
+    resizer.style.display = 'none'; 
     updateLayout();
 }
 
-// 绑定书签点击
 if (sidebarHandle) sidebarHandle.addEventListener('click', expandSidebar);
 
-// 拖拽条逻辑
 resizer.addEventListener('pointerdown', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -522,18 +515,28 @@ resizer.addEventListener('pointerdown', (e) => {
     resizer.classList.add('active');
     resizer.setPointerCapture(e.pointerId);
     document.body.style.userSelect = 'none';
-    lastSidebarWidth = sidebar.clientWidth; // 记录拖拽前的宽度
+    lastSidebarWidth = sidebar.clientWidth; 
 });
 
 resizer.addEventListener('pointermove', (e) => {
     if (!isResizing) return;
     const newWidth = window.innerWidth - e.clientX;
+
+    // 【核心修复】只要拖拽到宽度小于 200px，立刻触发折叠，不需要等手指松开
+    // 这完美解决了快速滑动时无法触发折叠的问题
+    if (newWidth < 200) {
+        collapseSidebar();
+        isResizing = false;
+        resizer.classList.remove('active');
+        document.body.style.userSelect = '';
+        if (e.pointerId) resizer.releasePointerCapture(e.pointerId);
+        return;
+    }
+
     const maxWidth = window.innerWidth - 100;
-    
-    // 正常拖拽范围
-    if (newWidth > 150 && newWidth < maxWidth) {
+    if (newWidth >= 200 && newWidth < maxWidth) {
         sidebar.style.width = newWidth + 'px';
-        resizer.style.right = newWidth + 'px'; // 实时同步拖拽条位置
+        resizer.style.right = newWidth + 'px';
         updateLayout();
     }
 });
@@ -542,14 +545,12 @@ resizer.addEventListener('pointerup', (e) => {
     if (isResizing) {
         isResizing = false;
         resizer.classList.remove('active');
-        resizer.releasePointerCapture(e.pointerId);
+        if (e.pointerId) resizer.releasePointerCapture(e.pointerId);
         document.body.style.userSelect = '';
         
-        // 松手时判断宽度，如果太窄，触发折叠
-        if (sidebar.clientWidth < 150) {
-            collapseSidebar();
-        } else {
-            lastSidebarWidth = sidebar.clientWidth; // 记录最终舒适宽度
+        // 如果松开时宽度依然在合理范围，记录为最终宽度
+        if (sidebar.clientWidth >= 200) {
+            lastSidebarWidth = sidebar.clientWidth;
             updateLayout();
         }
     }
@@ -559,7 +560,7 @@ resizer.addEventListener('pointercancel', (e) => {
     if (isResizing) {
         isResizing = false;
         resizer.classList.remove('active');
-        resizer.releasePointerCapture(e.pointerId);
+        if (e.pointerId) resizer.releasePointerCapture(e.pointerId);
         document.body.style.userSelect = '';
         updateLayout();
     }

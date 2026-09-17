@@ -417,18 +417,23 @@ button:hover {
 }
 
 
-/* 【修改】侧边栏拖拽条样式（独立悬浮） */
 .resizer {
     position: absolute;
     top: 0;
-    bottom: 0; /* 关键：同时设置 top 和 bottom，使其撑满全屏高度 */
-    right: 350px; /* 默认与sidebar宽度对齐，宽度由JS动态控制 */
-    width: 30px; /* 扩宽触摸区域，方便手指拖动 */
-    z-index: 999;
+    bottom: 0;
+    right: 350px; 
+    width: 30px; /* 【核心】加宽到 30px，手指更容易按住 */
+    background: transparent; 
     cursor: col-resize;
-    touch-action: none; /* 阻止浏览器默认的滚动和缩放行为 */
+    z-index: 9999; /* 确保在最上层 */
+    touch-action: none; 
     display: flex;
     justify-content: center;
+    transition: background 0.2s;
+}
+
+.resizer:hover, .resizer.active {
+    background: rgba(33, 150, 243, 0.15); 
 }
 
 /* 视觉上的细线 */
