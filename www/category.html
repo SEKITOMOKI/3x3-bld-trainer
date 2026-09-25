@@ -1,82 +1,201 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <title>公式列表</title>
     <link rel="stylesheet" href="css/style.css">
     <style>
-        body { display: flex; flex-direction: column; align-items: center; min-height: 100vh; background: #f0f0f0; margin: 0; font-family: sans-serif; padding-top: 50px; }
-        .header { display: flex; justify-content: space-between; width: 80%; max-width: 800px; margin-bottom: 30px; }
-        .back-btn { text-decoration: none; color: #2196F3; font-weight: bold; font-size: 18px; }
-        h1 { margin: 0; color: #333; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 15px; width: 80%; max-width: 800px; }
-        .formula-btn {
-            padding: 15px; background: white; border: 2px solid #2196F3; border-radius: 8px;
-            text-align: center; text-decoration: none; color: #2196F3; font-weight: bold; font-size: 18px;
-            transition: all 0.2s;
+        /* 【核心修改】保持手机端顺畅滚动 */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            background: #f0f0f0;
+            margin: 0;
+            font-family: sans-serif;
+            padding-top: 50px;
+            padding-bottom: 50px;
+            box-sizing: border-box;
         }
-        .formula-btn:hover { background: #2196F3; color: white; }
-        .empty-tip { color: #888; font-size: 18px; margin-top: 50px; }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            max-width: 800px;
+            margin-bottom: 30px;
+            flex-shrink: 0;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #333;
+        }
+
+        /* 通用网格布局（用于具体公式列表） */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            width: 80%;
+            max-width: 800px;
+            flex-shrink: 0;
+        }
+
+        /* 菜单模式下的纵向布局（用于展示四个大分类） */
+        .menu-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 80%;
+            max-width: 400px;
+        }
+
+        .formula-btn,
+        .menu-btn {
+            padding: 15px;
+            background: white;
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            text-align: center;
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+            font-size: 18px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .formula-btn:hover,
+        .menu-btn:hover {
+            background: #2196F3;
+            color: white;
+        }
+
+        .empty-tip {
+            color: #888;
+            font-size: 18px;
+            margin-top: 50px;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <a href="index.html" class="back-btn">← 返回主目录</a>
         <h1 id="pageTitle">公式列表</h1>
     </div>
+
+    <!-- 公式列表容器（分类模式） -->
     <div id="formulaGrid" class="grid"></div>
+
+    <!-- 菜单容器（一级菜单模式） -->
+    <div id="menuGrid" class="menu-grid" style="display: none;"></div>
+
     <div id="emptyTip" class="empty-tip" style="display: none;">该模块暂无公式数据，请在 data.js 中补充。</div>
 
     <script src="js/data.js"></script>
     <script>
         // 获取 URL 参数
         const urlParams = new URLSearchParams(window.location.search);
-        const type = urlParams.get('type') || 'corner';
-        const category = formulaData[type];
+        const type = urlParams.get('type') || 'menu'; // 默认进入菜单模式
 
         const pageTitle = document.getElementById('pageTitle');
         const grid = document.getElementById('formulaGrid');
+        const menuGrid = document.getElementById('menuGrid');
         const emptyTip = document.getElementById('emptyTip');
 
-        if (category) {
-            pageTitle.textContent = category.name;
-            if (category.list.length === 0) {
-                emptyTip.style.display = 'block';
-            } else {
-                // 按 group 分组
-                const groups = {};
-                category.list.forEach(item => {
-                    const groupName = item.group || '其他公式';
-                    if (!groups[groupName]) groups[groupName] = [];
-                    groups[groupName].push(item);
-                });
+        // 【核心新增】如果 type 是 menu，展示四个大分类
+        if (type === 'menu') {
+            pageTitle.textContent = '公式分类';
+            menuGrid.style.display = 'flex';
+            grid.style.display = 'none';
 
-                // 渲染每个分组
-                for (const [groupName, items] of Object.entries(groups)) {
-                    // 分组标题
-                    const groupTitle = document.createElement('h3');
-                    groupTitle.textContent = groupName;
-                    groupTitle.style.gridColumn = '1 / -1'; // 跨越整行
-                    groupTitle.style.marginTop = '20px';
-                    groupTitle.style.marginBottom = '10px';
-                    groupTitle.style.color = '#333';
-                    groupTitle.style.fontSize = '18px';
-                    grid.appendChild(groupTitle);
+            const categories = [
+                { name: '角块基础公式', type: 'corner' },
+                { name: '棱块基础公式', type: 'edge' },
+                { name: '翻色公式', type: 'flip' },
+                { name: '奇偶校验公式', type: 'parity' }
+            ];
 
-                    // 分组内的公式按钮
-                    items.forEach(item => {
-                        const a = document.createElement('a');
-                        a.href = `formula.html?type=${type}&id=${item.id}`;
-                        a.className = 'formula-btn';
-                        a.textContent = item.name;
-                        grid.appendChild(a);
-                    });
-                }
-            }
+            categories.forEach(cat => {
+                const a = document.createElement('a');
+                a.href = `category.html?type=${cat.type}`;
+                a.className = 'menu-btn';
+                a.textContent = cat.name;
+                menuGrid.appendChild(a);
+            });
+
         } else {
-            pageTitle.textContent = '未知模块';
-        }
+            // 原有逻辑：展示具体的公式列表
+            const category = formulaData[type];
+            if (category) {
+                pageTitle.textContent = category.name;
+                menuGrid.style.display = 'none';
+                grid.style.display = 'grid';
 
+                if (category.list.length === 0) {
+                    emptyTip.style.display = 'block';
+                } else {
+                    // 按 group 分组
+                    const groups = {};
+                    category.list.forEach(item => {
+                        const groupName = item.group || '其他公式';
+                        if (!groups[groupName]) groups[groupName] = [];
+                        groups[groupName].push(item);
+                    });
+
+                    // 渲染每个分组
+                    for (const [groupName, items] of Object.entries(groups)) {
+                        const groupTitle = document.createElement('h3');
+                        groupTitle.textContent = groupName;
+                        groupTitle.style.gridColumn = '1 / -1';
+                        groupTitle.style.marginTop = '20px';
+                        groupTitle.style.marginBottom = '10px';
+                        groupTitle.style.color = '#333';
+                        groupTitle.style.fontSize = '18px';
+                        grid.appendChild(groupTitle);
+
+                        items.forEach(item => {
+                            const a = document.createElement('a');
+                            a.href = `formula.html?type=${type}&id=${item.id}`;
+                            a.className = 'formula-btn';
+                            a.textContent = item.name;
+                            grid.appendChild(a);
+                        });
+                    }
+                }
+            } else {
+                pageTitle.textContent = '未知模块';
+            }
+        }
+    </script>
+    <!-- 【新增】强制锁定横屏 -->
+    <script>
+        function lockLandscape() {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
+                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'landscape' })
+                    .catch(err => console.warn('锁定横屏失败:', err));
+            }
+        }
+        // 页面加载时锁定
+        document.addEventListener('DOMContentLoaded', lockLandscape);
+        // 页面重新显示时（从后台切回）也重新锁定
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') lockLandscape();
+        });
     </script>
 </body>
+
 </html>

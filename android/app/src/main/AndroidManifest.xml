@@ -16,7 +16,7 @@
             android:theme="@style/AppTheme.NoActionBarLaunch"
             android:launchMode="singleTask"
             android:exported="true"
-            android:screenOrientation="landscape">
+            android:screenOrientation="fullSensor">
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,8 +35,6 @@
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
     </application>
-
-    <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
 </manifest>

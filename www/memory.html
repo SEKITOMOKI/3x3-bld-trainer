@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>字母对记忆训练</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 【核心】保持手机端顺畅滚动 */
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            background: #f0f0f0;
+            margin: 0;
+            font-family: sans-serif;
+            padding: 30px 20px 50px;
+            box-sizing: border-box;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 25px;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: #2196F3;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        h1 {
+            margin: 0;
+            color: #333;
+            font-size: 22px;
+        }
+
+        .stage {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .hint {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .pair-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 30px;
+            max-width: 100%;
+        }
+
+        /* 【修改】结果对比专用样式 */
+        .pair-item {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 8px;
+            transition: all 0.2s;
+            box-sizing: border-box;
+        }
+
+        /* 记忆阶段的字母对展示 */
+        .pair-item .pair-correct {
+            font-size: 24px;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+
+        /* 用户输入的对比 */
+        .pair-item .pair-user {
+            font-size: 13px;
+            font-family: monospace;
+            color: #888;
+        }
+
+        /* 边框和颜色反馈 */
+        .pair-item.correct {
+            border-color: #4CAF50;
+            background: #e8f5e9;
+        }
+
+        .pair-item.correct .pair-correct {
+            color: #2e7d32;
+        }
+
+        .pair-item.correct .pair-user {
+            color: #4CAF50;
+            font-weight: bold;
+        }
+
+        .pair-item.incorrect {
+            border-color: #f44336;
+            background: #ffebee;
+        }
+
+        .pair-item.incorrect .pair-correct {
+            color: #c62828;
+        }
+
+        .pair-item.incorrect .pair-user {
+            color: #f44336;
+            font-weight: bold;
+            text-decoration: line-through;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .primary-btn {
+            background: #26a69a;
+            color: white;
+        }
+
+        .primary-btn:hover {
+            background: #00897b;
+        }
+
+        .secondary-btn {
+            background: #fff;
+            color: #333;
+            border: 2px solid #ccc;
+        }
+
+        .secondary-btn:hover {
+            background: #eee;
+        }
+
+        #recallInput {
+            width: 100%;
+            max-width: 600px;
+            padding: 15px 20px;
+            font-size: 20px;
+            font-family: monospace;
+            letter-spacing: 2px;
+            text-align: center;
+            border: 2px solid #2196F3;
+            border-radius: 8px;
+            outline: none;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            text-transform: uppercase;
+        }
+
+        #resultSummary {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            color: #333;
+        }
+
+        #resultSummary.all-correct {
+            color: #4CAF50;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            .pair-item {
+                width: 75px;
+                height: 75px;
+                border-width: 2px;
+            }
+
+            .pair-item .pair-correct {
+                font-size: 18px;
+            }
+
+            .pair-item .pair-user {
+                font-size: 11px;
+            }
+
+            .pair-grid {
+                gap: 8px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .primary-btn,
+            .secondary-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+        }
+
+        /* 联想词库面板 */
+        .wordlist-panel {
+            width: 100%;
+            max-width: 800px;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <a href="index.html" class="back-btn">← 返回主目录</a>
+        <h1>字母对记忆训练</h1>
+    </div>
+
+    <!-- ========== 阶段 1: 记忆 ========== -->
+    <div id="memoryStage" class="stage">
+        <p class="hint">请记住以下 11 个字母对（按 Enter 键或点击按钮继续）：</p>
+        <div class="pair-grid" id="pairGrid"></div>
+        <button id="memorizedBtn" class="primary-btn">记住了</button>
+    </div>
+
+    <!-- ========== 阶段 2: 回忆 ========== -->
+    <div id="recallStage" class="stage" style="display: none;">
+        <p class="hint">请回忆并输入刚才的 11 个字母对（可加空格）：</p>
+        <input type="text" id="recallInput" placeholder="例如: AB CD EF GH..." autocomplete="off"
+            autocapitalize="characters" spellcheck="false">
+        <button id="recallBtn" class="primary-btn">回忆完毕</button>
+    </div>
+
+    <!-- ========== 阶段 3: 结果 ========== -->
+    <div id="resultStage" class="stage" style="display: none;">
+        <p id="resultSummary"></p>
+        <div class="pair-grid" id="resultGrid"></div>
+        <!-- 【需求2】调换按钮位置：返回主页在前，继续练习在后 -->
+        <div class="btn-row">
+            <button id="homeBtn" class="secondary-btn">返回主页</button>
+            <button id="continueBtn" class="primary-btn">继续练习</button>
+        </div>
+    </div>
+
+    <!-- 个人联想词词库面板 -->
+    <details class="wordlist-panel">
+        <summary>📖 个人联想词库</summary>
+        <div class="wl-tools">
+            <input id="assocSearch" type="text" placeholder="搜索字母组合或联想词..." autocomplete="off">
+        </div>
+        <div class="wl-grid" id="assocGrid"></div>
+        <div class="wl-footer">
+            <button id="assocExportBtn">导出备份</button>
+            <button id="assocImportBtn">导入备份</button>
+        </div>
+        <div class="wl-format-tip">支持导入/导出 JSON 格式文件 (.json)</div>
+    </details>
+
+    <script>
+        // ========== 状态变量 ==========
+        let originalPairs = [];
+        const LETTERS = 'ABCDEFGHJKLMNPQRSTWXYZ'.split(''); // 排除 I, O, U, V
+
+        // ========== 生成 11 个随机字母对 ==========
+        function generatePairs(count = 11) {
+            const pairs = [];
+            const usedPairs = new Set(); // 记录已经生成过的字母对
+
+            while (pairs.length < count) {
+                const a = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                let b;
+                do {
+                    b = LETTERS[Math.floor(Math.random() * LETTERS.length)];
+                } while (b === a);
+
+                const pair = a + b;
+                if (!usedPairs.has(pair)) {
+                    usedPairs.add(pair);
+                    pairs.push(pair);
+                }
+            }
+            return pairs;
+        }
+
+        // ========== 渲染字母对 ==========
+        function renderPairs(container, pairs, statusArray, userPairs) {
+            container.innerHTML = '';
+            pairs.forEach((pair, index) => {
+                const div = document.createElement('div');
+                div.className = 'pair-item';
+
+                // 正确的字母对
+                const correctDiv = document.createElement('div');
+                correctDiv.className = 'pair-correct';
+                correctDiv.textContent = pair;
+                div.appendChild(correctDiv);
+
+                // 【需求1】用户输入的字母对对比（仅在结果阶段展示）
+                if (statusArray && userPairs) {
+                    const userDiv = document.createElement('div');
+                    userDiv.className = 'pair-user';
+                    userDiv.textContent = userPairs[index] || '--';
+                    div.appendChild(userDiv);
+
+                    if (statusArray[index] === 'correct') div.classList.add('correct');
+                    else if (statusArray[index] === 'incorrect') div.classList.add('incorrect');
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+        // ========== 阶段切换 ==========
+        function showStage(stageId) {
+            ['memoryStage', 'recallStage', 'resultStage'].forEach(id => {
+                document.getElementById(id).style.display = (id === stageId) ? 'flex' : 'none';
+            });
+        }
+
+        // ========== 开始新一轮 ==========
+        function startNewRound() {
+            originalPairs = generatePairs(11);
+            renderPairs(document.getElementById('pairGrid'), originalPairs);
+            document.getElementById('recallInput').value = '';
+            showStage('memoryStage');
+        }
+
+        // ========== 进入回忆阶段 ==========
+        function goToRecall() {
+            showStage('recallStage');
+            setTimeout(() => document.getElementById('recallInput').focus(), 100);
+        }
+
+        // ========== 提交回忆 ==========
+        function submitRecall() {
+            const input = document.getElementById('recallInput').value;
+            // 忽略空格等非字母字符，转大写
+            const cleaned = input.replace(/[^A-Za-z]/g, '').toUpperCase();
+
+            // 每 2 个字符分组
+            const userPairs = [];
+            for (let i = 0; i < originalPairs.length; i++) {
+                userPairs.push(cleaned.substr(i * 2, 2));
+            }
+
+            // 逐位比较
+            const statusArray = [];
+            let correctCount = 0;
+            for (let i = 0; i < originalPairs.length; i++) {
+                if (userPairs[i] === originalPairs[i]) {
+                    statusArray.push('correct');
+                    correctCount++;
+                } else {
+                    statusArray.push('incorrect');
+                }
+            }
+
+            // 渲染结果（传入 originalPairs, statusArray, userPairs）
+            renderPairs(document.getElementById('resultGrid'), originalPairs, statusArray, userPairs);
+
+            const summary = document.getElementById('resultSummary');
+            const total = originalPairs.length;
+            if (correctCount === total) {
+                summary.textContent = `🎉 全对！${correctCount} / ${total}`;
+                summary.classList.add('all-correct');
+            } else {
+                summary.textContent = `正确 ${correctCount} / ${total}，错误 ${total - correctCount}`;
+                summary.classList.remove('all-correct');
+            }
+
+            showStage('resultStage');
+        }
+
+
+
+        // ========== 事件绑定 ==========
+        document.getElementById('memorizedBtn').addEventListener('click', goToRecall);
+        document.getElementById('recallBtn').addEventListener('click', submitRecall);
+        document.getElementById('continueBtn').addEventListener('click', startNewRound);
+        document.getElementById('homeBtn').addEventListener('click', () => {
+            window.location.href = 'index.html';
+        });
+
+        // 回忆输入框按 Enter 键提交
+        document.getElementById('recallInput').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                submitRecall();
+            }
+        });
+
+        // ========== 全局键盘事件 ==========
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const memoryStage = document.getElementById('memoryStage');
+                const resultStage = document.getElementById('resultStage');
+                const tag = document.activeElement.tagName;
+
+                // 1. 在记忆阶段：按 Enter 进入回忆
+                if (memoryStage.style.display !== 'none' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                    e.preventDefault();
+                    goToRecall();
+                }
+                // 2. 【需求3】在结果阶段：按 Enter 继续练习
+                else if (resultStage.style.display !== 'none' && tag !== 'INPUT' && tag !== 'TEXTAREA') {
+                    e.preventDefault();
+                    startNewRound();
+                }
+            }
+        });
+
+        // ========== 初始化 ==========
+        startNewRound();
+    </script>
+
+    <!-- 引入联想词库逻辑 -->
+    <script src="js/assoc.js"></script>
+
+    <!-- 【新增】记忆训练页面允许自由旋转 -->
+    <script>
+        function unlockOrientation() {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
+                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'any' })
+                    .catch(err => console.warn('解锁屏幕方向失败:', err));
+            }
+        }
+        document.addEventListener('DOMContentLoaded', unlockOrientation);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') unlockOrientation();
+        });
+    </script>
+</body>
+
+</html>

@@ -73,7 +73,7 @@
     // --- 渲染逻辑 ---
     function render(filterText = '') {
         const q = filterText.trim().toUpperCase();
-        
+
         const items = Object.keys(assocData).filter(key => {
             const word = assocData[key];
             return key.includes(q) || word.toUpperCase().includes(q);
@@ -124,7 +124,7 @@
         // 失焦（点击其他地方）保存
         input.addEventListener('blur', () => {
             const newWord = input.value.trim();
-            
+
             if (newWord === '') {
                 if (confirm(`确定要清空 [${key}] 的联想词吗？`)) {
                     delete assocData[key];
@@ -155,30 +155,30 @@
     });
 
     // 导出数据（【核心修改】适配平板原生分享）
-        // 导出数据（适配平板原生分享）
+    // 导出数据（适配平板原生分享）
     exportBtn.addEventListener('click', async () => {
         const dataStr = JSON.stringify(assocData, null, 2);
-        const fileName = `assoc_wordlist_${new Date().toISOString().slice(0,10)}.json`;
-        
+        const fileName = `assoc_wordlist_${new Date().toISOString().slice(0, 10)}.json`;
+
         // 安全获取全局 Capacitor 对象
         const capacitor = window.Capacitor;
         const isNative = capacitor && capacitor.isNativePlatform && capacitor.isNativePlatform();
-        
+
         if (isNative && capacitor.Plugins && capacitor.Plugins.Filesystem && capacitor.Plugins.Share) {
             // ===== 安卓原生 App 环境 =====
             try {
                 const Filesystem = capacitor.Plugins.Filesystem;
                 const Share = capacitor.Plugins.Share;
-                
+
                 // 1. 把文件写入 App 的缓存目录
                 // 注意：直接用字符串 'CACHE' 替代 Directory.Cache，用 'utf8' 替代 Encoding.UTF8
                 const result = await Filesystem.writeFile({
                     path: fileName,
                     data: dataStr,
-                    directory: 'CACHE', 
+                    directory: 'CACHE',
                     encoding: 'utf8'
                 });
-                
+
                 // 2. 调起安卓系统底层的分享菜单
                 await Share.share({
                     title: '导出联想词库',
@@ -195,7 +195,7 @@
             try {
                 const blob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
-                
+
                 const a = document.createElement('a');
                 a.href = url;
                 a.download = fileName;
@@ -224,7 +224,7 @@
                 try {
                     const imported = JSON.parse(reader.result);
                     const cleaned = normalizeData(imported);
-                    
+
                     if (Object.keys(cleaned).length === 0) {
                         alert("导入失败：文件里没有找到有效的联想词数据。");
                         return;

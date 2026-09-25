@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>三阶盲拧新手练习平台</title>
+    <title>三阶盲拧彳亍法新手练习平台</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- 引入 WCA 官方打乱生成库 (如果本地已完全取代，可保持注释) -->
     <!-- <script src="https://cdn.cubing.net/v0/js/cubing/twisty" type="module"></script> -->
@@ -15,6 +15,42 @@
             }
         }
     </script>
+        <style>
+        /* 【修改】侧边栏顶部标题区样式：放大字体 */
+        .sidebar-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .sidebar-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 22px; /* 从 16px 放大到 22px */
+            line-height: 1.5;
+            color: #333;
+            font-weight: bold;
+        }
+        .sidebar-header .author {
+            font-size: 15px; /* 从 12px 放大到 15px */
+            color: #888;
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+        .sidebar-header .author:hover {
+            color: #2196F3;
+            text-decoration: underline;
+        }
+
+        /* 当侧边栏非常窄时（用户向右拖拽），自动缩小字体防止换行溢出 */
+        @media (max-width: 1200px) {
+            .sidebar-header h1 {
+                font-size: 18px; /* 从 13px 提升到 18px */
+            }
+            .sidebar-header .author {
+                font-size: 13px; /* 从 10px 提升到 13px */
+            }
+        }
+    </style>
 </head>
 
 <body>
@@ -28,8 +64,7 @@
                     <span id="scrambleText">等待打乱...</span>
                 </div>
             </div>
-            
-            <!-- 【修复】删除了重复嵌套的 <div id="ui">，确保按钮定位正确 -->
+
             <div id="ui">
                 <div class="controls-row">
                     <button id="toggleLetterBtn" class="btn-green">显示编码</button>
@@ -47,12 +82,17 @@
 
         <!-- 右侧导航菜单与笔记区 -->
         <aside class="sidebar">
-            <!-- <h1>三阶盲拧<br>新手练习平台</h1> -->
+            <!-- 【新增】平台标题与作者署名 -->
+            <div class="sidebar-header">
+                <h1>三阶盲拧彳亍法<br>新手练习平台</h1>
+                <a href="https://github.com/SEKITOMOKI/3x3-bld-trainer" target="_blank" rel="noopener" class="author">by SEKITOMOKI</a>
+            </div>
+
             <div class="menu-list">
-                <a href="category.html?type=corner" class="menu-btn">角块公式 <span>18条</span></a>
-                <a href="category.html?type=edge" class="menu-btn">棱块公式 <span>8条</span></a>
-                <a href="category.html?type=flip" class="menu-btn">翻色公式</a>
-                <a href="category.html?type=parity" class="menu-btn">奇偶校验公式</a>
+                <!-- 公式按钮 -->
+                <a href="category.html?type=menu" class="menu-btn">公式</a>
+                <!-- 记忆训练按钮 -->
+                <a href="memory.html" class="menu-btn">记忆训练</a>
             </div>
 
             <!-- 当前打乱编码笔记面板 -->
@@ -87,7 +127,7 @@
             </details>
         </aside>
 
-        <!-- 【新增】书签按钮（必须在 sidebar 外面，当 sidebar 隐藏时它依然可见可点击） -->
+        <!-- 书签按钮（必须在 sidebar 外面，当 sidebar 隐藏时它依然可见可点击） -->
         <div id="sidebarHandle"
             style="display: none; position: fixed; right: 0; top: 50%; transform: translateY(-50%); background: #2196F3; color: white; padding: 15px 8px; border-radius: 10px 0 0 10px; cursor: pointer; z-index: 1000; font-size: 13px; font-weight: bold; box-shadow: -2px 0 8px rgba(0,0,0,0.2); writing-mode: vertical-rl; letter-spacing: 2px; transition: all 0.2s;">
             工具</div>
