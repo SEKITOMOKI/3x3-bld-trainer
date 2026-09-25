@@ -3,6 +3,10 @@ body {
     overflow: hidden;
     background-color: #f0f0f0;
     font-family: sans-serif;
+    height: 100vh;
+    /* 旧版浏览器回退 */
+    height: 100dvh;
+    /* 【核心修复】动态视口高度，自动适应地址栏 */
 }
 
 /* 容器改为相对定位，限制子元素不溢出 */
@@ -10,6 +14,9 @@ body {
     position: relative;
     width: 100vw;
     height: 100vh;
+    /* 回退 */
+    height: 100dvh;
+    /* 【核心修复】 */
     overflow: hidden;
 }
 
@@ -27,8 +34,10 @@ body {
 .practice-area {
     position: absolute;
     top: 0;
-    left: -250px; /* 【核心】向左偏移 250px，你可以根据侧边栏最小宽度自行微调，比如 -200px 或 -300px */
-    width: calc(100% + 250px); /* 补足偏移出来的右侧空间，防止画布被裁切 */
+    left: -250px;
+    /* 【核心】向左偏移 250px，你可以根据侧边栏最小宽度自行微调，比如 -200px 或 -300px */
+    width: calc(100% + 250px);
+    /* 补足偏移出来的右侧空间，防止画布被裁切 */
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -37,7 +46,8 @@ body {
 /* 底部按钮 */
 #ui {
     position: absolute;
-    bottom: 30px;
+    bottom: 5px;
+    /* 你当前的设置 */
     width: 100%;
     left: 0;
     display: flex;
@@ -45,14 +55,17 @@ body {
     align-items: center;
     pointer-events: none;
     z-index: 5;
-    /* 【移除】之前的 padding-right 不再需要，因为整个练习区已经左移了 */
+    padding-bottom: env(safe-area-inset-bottom, 5px);
+    /* 【核心修复】避开手机底部安全区域 */
+    box-sizing: border-box;
 }
 
 /* 修改 .controls-row 样式，允许换行 */
 .controls-row {
     display: flex;
     gap: 10px;
-    flex-wrap: wrap; /* 允许按钮换行 */
+    flex-wrap: wrap;
+    /* 允许按钮换行 */
     justify-content: center;
     pointer-events: auto;
 }
@@ -421,19 +434,22 @@ button:hover {
     position: absolute;
     top: 0;
     bottom: 0;
-    right: 350px; 
-    width: 30px; /* 【核心】加宽到 30px，手指更容易按住 */
-    background: transparent; 
+    right: 350px;
+    width: 30px;
+    /* 【核心】加宽到 30px，手指更容易按住 */
+    background: transparent;
     cursor: col-resize;
-    z-index: 9999; /* 确保在最上层 */
-    touch-action: none; 
+    z-index: 9999;
+    /* 确保在最上层 */
+    touch-action: none;
     display: flex;
     justify-content: center;
     transition: background 0.2s;
 }
 
-.resizer:hover, .resizer.active {
-    background: rgba(33, 150, 243, 0.15); 
+.resizer:hover,
+.resizer.active {
+    background: rgba(33, 150, 243, 0.15);
 }
 
 /* 视觉上的细线 */
@@ -445,7 +461,8 @@ button:hover {
     transition: background 0.2s;
 }
 
-.resizer:hover::after, .resizer.active::after {
+.resizer:hover::after,
+.resizer.active::after {
     background: #2196F3;
 }
 
@@ -455,46 +472,65 @@ button:hover {
     color: white;
     border-color: #9C27B0;
 }
-.btn-purple:hover { background: #7B1FA2; }
+
+.btn-purple:hover {
+    background: #7B1FA2;
+}
 
 .btn-orange {
     background: #FF9800;
     color: white;
     border-color: #FF9800;
 }
-.btn-orange:hover { background: #F57C00; }
+
+.btn-orange:hover {
+    background: #F57C00;
+}
 
 /* ============================================================
  * 【修改】手机端适配（屏幕宽度小于 600px 时生效）
  * ============================================================ */
 @media (max-width: 600px) {
+
     /* 1. 按钮往下调：贴近屏幕底部 */
     #ui {
-        bottom: 5px; /* 原本是 30px，改小到 5px，非常贴近底部 */
-        padding: 0 4px; /* 左右只留一点点缝隙 */
+        bottom: 5px;
+        /* 原本是 30px，改小到 5px，非常贴近底部 */
+        padding: 0 4px;
+        /* 左右只留一点点缝隙 */
         box-sizing: border-box;
         width: 100%;
     }
 
     /* 2. 强制排成一排，绝不换行 */
     .controls-row {
-        display: flex; /* 改为 flex 布局 */
-        flex-wrap: nowrap; /* 强制不换行 */
-        justify-content: space-between; /* 按钮均匀分布 */
-        gap: 4px; /* 按钮之间的缝隙极小 */
-        width: 100%; 
+        display: flex;
+        /* 改为 flex 布局 */
+        flex-wrap: nowrap;
+        /* 强制不换行 */
+        justify-content: space-between;
+        /* 按钮均匀分布 */
+        gap: 4px;
+        /* 按钮之间的缝隙极小 */
+        width: 100%;
         padding: 0;
         margin: 0 auto;
     }
 
     /* 3. 极致压缩按钮尺寸 */
     button {
-        padding: 6px 1px; /* 上下 6px，左右 1px，尽可能紧凑 */
-        font-size: 10px; /* 字体调到 10px，确保 6 个按钮能挤在一行 */
-        flex: 1; /* 每个按钮平分宽度 */
-        min-width: 0; /* 允许按钮缩小到内容宽度以下 */
-        white-space: nowrap; /* 文字绝不换行 */
-        text-overflow: ellipsis; /* 超出部分省略号 */
+        padding: 6px 1px;
+        /* 上下 6px，左右 1px，尽可能紧凑 */
+        font-size: 10px;
+        /* 字体调到 10px，确保 6 个按钮能挤在一行 */
+        flex: 1;
+        /* 每个按钮平分宽度 */
+        min-width: 0;
+        /* 允许按钮缩小到内容宽度以下 */
+        white-space: nowrap;
+        /* 文字绝不换行 */
+        text-overflow: ellipsis;
+        /* 超出部分省略号 */
         overflow: hidden;
         border-radius: 4px;
     }
@@ -504,11 +540,13 @@ button:hover {
  * 【修改】横屏手机 / 平板 / 桌面小窗口适配（屏幕宽度在 1200px 以下）
  * ============================================================ */
 @media (max-width: 1200px) {
+
     /* 1. 底部按钮区域留出右侧侧边栏的宽度，防止被遮挡 */
     #ui {
         bottom: 5px;
         width: 100%;
-        padding-right: 360px; /* 关键：为右侧悬浮的侧边栏留出空间 */
+        padding-right: 360px;
+        /* 关键：为右侧悬浮的侧边栏留出空间 */
         padding-left: 5px;
         box-sizing: border-box;
     }
@@ -517,20 +555,17 @@ button:hover {
     .controls-row {
         display: flex;
         flex-wrap: nowrap;
-        gap: 3px; /* 按钮间距极小 */
-        width: 100%; 
+        gap: 3px;
+        /* 按钮间距极小 */
+        width: 100%;
     }
 
     /* 3. 极致压缩按钮，让 6 个按钮在有限空间内并排显示 */
     button {
-        flex: 1; /* 平分可用宽度 */
-        min-width: 0; 
-        padding: 6px 2px; /* 上下 6px，左右 2px */
-        font-size: 10px; /* 缩小字体到 10px */
-        white-space: nowrap; /* 文字不换行 */
+        flex: 1;
+        font-size: 10px;
+        text-overflow: ellipsis;
         overflow: hidden;
-        text-overflow: ellipsis; /* 超出的文字显示省略号，例如“取消角块专...” */
-        border-radius: 4px;
     }
 
     /* 4. 特殊处理左侧偏移，让按钮在左侧剩余空间居中 */

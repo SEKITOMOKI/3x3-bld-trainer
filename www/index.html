@@ -15,7 +15,7 @@
             }
         }
     </script>
-        <style>
+    <style>
         /* 【修改】侧边栏顶部标题区样式：放大字体 */
         .sidebar-header {
             text-align: center;
@@ -23,19 +23,24 @@
             padding-bottom: 20px;
             border-bottom: 1px solid #eee;
         }
+
         .sidebar-header h1 {
             margin: 0 0 10px 0;
-            font-size: 22px; /* 从 16px 放大到 22px */
+            font-size: 22px;
+            /* 从 16px 放大到 22px */
             line-height: 1.5;
             color: #333;
             font-weight: bold;
         }
+
         .sidebar-header .author {
-            font-size: 15px; /* 从 12px 放大到 15px */
+            font-size: 15px;
+            /* 从 12px 放大到 15px */
             color: #888;
             text-decoration: none;
             transition: color 0.2s;
         }
+
         .sidebar-header .author:hover {
             color: #2196F3;
             text-decoration: underline;
@@ -44,10 +49,13 @@
         /* 当侧边栏非常窄时（用户向右拖拽），自动缩小字体防止换行溢出 */
         @media (max-width: 1200px) {
             .sidebar-header h1 {
-                font-size: 18px; /* 从 13px 提升到 18px */
+                font-size: 18px;
+                /* 从 13px 提升到 18px */
             }
+
             .sidebar-header .author {
-                font-size: 13px; /* 从 10px 提升到 13px */
+                font-size: 13px;
+                /* 从 10px 提升到 13px */
             }
         }
     </style>
@@ -85,7 +93,8 @@
             <!-- 【新增】平台标题与作者署名 -->
             <div class="sidebar-header">
                 <h1>三阶盲拧彳亍法<br>新手练习平台</h1>
-                <a href="https://github.com/SEKITOMOKI/3x3-bld-trainer" target="_blank" rel="noopener" class="author">by SEKITOMOKI</a>
+                <a href="https://github.com/SEKITOMOKI/3x3-bld-trainer" target="_blank" rel="noopener" class="author">by
+                    SEKITOMOKI</a>
             </div>
 
             <div class="menu-list">
@@ -117,6 +126,10 @@
                 <summary>📖 个人联想词库</summary>
                 <div class="wl-tools">
                     <input id="assocSearch" type="text" placeholder="搜索字母组合或联想词..." autocomplete="off">
+                    <!-- 【新增】添加新联想词按钮 -->
+                    <button id="assocAddBtn"
+                        style="margin-top: 8px; width: 100%; padding: 8px; background: #4CAF50; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">+
+                        新增联想词</button>
                 </div>
                 <div class="wl-grid" id="assocGrid"></div>
                 <div class="wl-footer">

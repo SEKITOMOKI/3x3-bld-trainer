@@ -101,6 +101,36 @@
     searchInput.addEventListener('input', (e) => {
         render(e.target.value);
     });
+    // 【新增】绑定新增联想词按钮逻辑
+    const addBtn = document.getElementById('assocAddBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', () => {
+            const key = prompt("请输入字母组合（例如 AB）：");
+            if (!key) return;
+            const upperKey = key.toUpperCase().trim();
+
+            // 校验规则：不能为空，必须是2个字母，不能包含 I/O/U/V，且两个字母不能相同
+            if (upperKey.length !== 2 || /[IOUV]/.test(upperKey) || upperKey[0] === upperKey[1]) {
+                alert("字母组合必须是两个不相同的字母，且不能包含 I、O、U、V！");
+                return;
+            }
+
+            // 如果这个字母组合已经存在，提示用户是否覆盖
+            if (assocData[upperKey]) {
+                if (!confirm(`字母组合 [${upperKey}] 已经存在，是否覆盖？`)) {
+                    return;
+                }
+            }
+
+            const word = prompt(`请输入 [${upperKey}] 的联想词：`);
+            if (!word || !word.trim()) return;
+
+            assocData[upperKey] = word.trim();
+            saveData(); // 保存到 localStorage
+            render(searchInput.value); // 重新渲染列表
+            alert(`已成功添加：${upperKey} -> ${word.trim()}`);
+        });
+    }
 
     // 点击词条进入编辑模式
     grid.addEventListener('click', (e) => {
