@@ -11,11 +11,16 @@
             overflow: hidden;
             background-color: #f0f0f0;
             display: flex;
+            height: 100vh;
+            height: 100dvh;
+            /* 【核心修复】动态视口高度 */
         }
 
         #canvas-container {
             flex: 1;
             height: 100vh;
+            height: 100dvh;
+            /* 【核心修复】 */
             position: relative;
         }
 
@@ -124,6 +129,8 @@
         #sidebar {
             width: 250px;
             height: 100vh;
+            height: 100dvh;
+            /* 【核心修复】 */
             background: white;
             box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
             display: flex;
@@ -175,15 +182,26 @@
             background: #757575;
         }
 
-        /* ============================================================
+                /* ============================================================
          * 【核心修复】专门优化公式演示页的手机端按钮
          * 覆盖全局压缩规则，确保“演示”、“暂停”、“重置”完整显示
          * ============================================================ */
         @media (max-width: 1200px) {
+            /* 【关键修复1】让画布容器宽度 = 屏幕宽度 - 侧边栏宽度（250px） */
+            /* 彻底覆盖全局 style.css 中的 100vw */
+            #canvas-container {
+                width: calc(100vw - 250px) !important;
+                position: relative !important;
+            }
+
+            /* 【关键修复2】彻底清除全局 style.css 给 #ui 加上的 360px 右侧内边距 */
+            /* 否则按钮会被硬生生推到屏幕左侧外 */
             #ui {
-                bottom: 20px !important;
-                /* 适配手机底部安全区域（如 iPhone 小白条） */
-                padding-bottom: env(safe-area-inset-bottom, 5px) !important;
+                bottom: 10px !important;
+                padding: 0 0 10px 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
             }
 
             #ui .controls-row {
@@ -192,18 +210,12 @@
 
             #ui .controls-row button {
                 flex: none !important;
-                /* 取消平分宽度，让按钮按文字长度自适应 */
                 width: auto !important;
                 min-width: 80px !important;
-                /* 设定最小宽度，保证按钮宽敞不拥挤 */
-                padding: 10px 25px !important;
-                /* 恢复合理的左右内边距 */
+                padding: 10px 20px !important;
                 font-size: 15px !important;
-                /* 字号恢复到 15px，清晰易读 */
                 white-space: nowrap !important;
-                /* 文字不换行 */
                 text-overflow: clip !important;
-                /* 取消省略号 */
                 overflow: visible !important;
                 border-radius: 8px !important;
             }
