@@ -18,7 +18,7 @@ if (!currentFormula) {
 
 document.getElementById('formulaTitle').textContent = `${category.name} - ${currentFormula.name}`;
 document.getElementById('forwardFormula').textContent = currentFormula.formula;
-
+document.getElementById('sidebarTitle').textContent = category.name;
 
 // 生成侧边栏列表（支持分组）
 const sidebarList = document.getElementById('sidebarList');
@@ -72,6 +72,7 @@ const reverseSteps = generateReverseSteps(forwardSteps);
 const container = document.getElementById('canvas-container');
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0f0f0);
+window.__scene = scene;
 
 let width = container.clientWidth;
 let height = container.clientHeight;

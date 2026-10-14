@@ -1,3 +1,7 @@
+html[data-theme="dark"] body {
+    background-color: #0e1016;
+}
+
 body {
     margin: 0;
     overflow: hidden;
@@ -572,5 +576,226 @@ button:hover {
     .practice-area {
         left: 0 !important;
         width: 100% !important;
+    }
+}
+
+
+/* 主题切换按钮 */
+.theme-toggle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid #e2e8f0;
+    background: #f1f5f9;
+    color: #64748b;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background .15s, color .15s, transform .1s;
+    padding: 0;
+    margin: 12px auto 0;
+    /* 顶部留白 + 水平居中 */
+}
+
+.theme-toggle:hover {
+    background: #e6ebf3;
+    color: #333;
+}
+
+.theme-toggle:active {
+    transform: scale(.94);
+}
+
+.theme-toggle svg {
+    width: 20px;
+    height: 20px;
+    display: none;
+}
+
+[data-theme="light"] .theme-toggle .icon-moon {
+    display: block;
+}
+
+[data-theme="dark"] .theme-toggle .icon-sun {
+    display: block;
+}
+
+
+/* 深色主题变量 */
+[data-theme="dark"] {
+    --bg: #0e1016;
+    --card-bg: #171b26;
+    --card-border: #262c3a;
+    --text: #e8eaf0;
+    --text-sub: #9aa5bd;
+    --input-bg: #11151e;
+    --input-border: #2c3446;
+    --sidebar-bg: #171b26;
+    --menu-btn-bg: #1e2431;
+    --menu-btn-text: #b9c2d6;
+    --menu-btn-border: #2e3648;
+}
+
+/* 深色主题下覆盖平台原有样式 */
+[data-theme="dark"] body {
+    background-color: #0e1016;
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .sidebar {
+    background: #171b26;
+    box-shadow: -4px 0 15px rgba(0, 0, 0, .4);
+}
+
+[data-theme="dark"] .sidebar-header h1 {
+    color: #fff;
+}
+
+[data-theme="dark"] .sidebar-header h1 .title-link {
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .sidebar-header h1 .title-link:hover {
+    color: #6fb1ff;
+}
+
+[data-theme="dark"] .menu-btn {
+    background: #1e2431;
+    color: #b9c2d6;
+    border-color: #2e3648;
+}
+
+[data-theme="dark"] .menu-btn:hover {
+    background: #2196F3;
+    color: #fff;
+}
+
+[data-theme="dark"] .menu-btn span {
+    background: #2a3244;
+    color: #9aa5bd;
+}
+
+[data-theme="dark"] .note-panel {
+    background: #171b26;
+    border-color: #262c3a;
+}
+
+[data-theme="dark"] .note-panel h3 {
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .note-item textarea {
+    background: #11151e;
+    border-color: #2c3446;
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .wordlist-panel {
+    background: #171b26;
+    border-color: #262c3a;
+}
+
+[data-theme="dark"] .wordlist-panel summary {
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .wl-tools input {
+    background: #11151e;
+    border-color: #2c3446;
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .wl-item {
+    background: #11151e;
+    border-color: #262c3a;
+}
+
+[data-theme="dark"] .wl-word {
+    color: #c6cee0;
+}
+
+[data-theme="dark"] .wl-empty {
+    color: #7b849a;
+}
+
+[data-theme="dark"] .wl-footer button {
+    background: #1e2431;
+    border-color: #2e3648;
+    color: #b9c2d6;
+}
+
+[data-theme="dark"] button {
+    background: #1e2431;
+    color: #b9c2d6;
+    border-color: #2e3648;
+}
+
+[data-theme="dark"] button:hover {
+    background: #252c3c;
+}
+
+[data-theme="dark"] #scramble-display {
+    background: rgba(23, 27, 38, 0.95);
+    color: #e8eaf0;
+}
+
+[data-theme="dark"] .practice-tip {
+    background: #1a2332;
+    border-left-color: #2196F3;
+}
+
+[data-theme="dark"] .practice-tip h3 {
+    color: #6fb1ff;
+}
+
+[data-theme="dark"] .practice-tip p {
+    color: #9aa5bd;
+}
+
+/* ============================================================
+ *  footer 按钮：覆盖全局 button 压缩规则，允许换行
+ * ============================================================ */
+.footer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+}
+
+.footer-btns {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 8px;
+    width: 100%;
+}
+
+/* 用 .footer .footer-btns .btn 高优先级覆盖全局 button 规则 */
+.footer .footer-btns .btn {
+    flex: 0 1 auto;
+    width: auto;
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    text-overflow: clip;
+    overflow: visible;
+    border-radius: 12px;
+}
+
+.footer>.muted.small {
+    text-align: center;
+    width: 100%;
+}
+
+/* 手机小屏进一步优化 */
+@media (max-width: 480px) {
+    .footer-btns {
+        grid-template-columns: repeat(2, 1fr);
+        /* 强制两列 */
+    }
+
+    .footer .footer-btns .btn {
+        font-size: 12px;
+        padding: 9px 8px;
     }
 }

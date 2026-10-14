@@ -28,14 +28,28 @@ const formulaData = {
     edge: {
         name: '棱块公式',
         list: [
-            { id: 'CG', group: '基础棱块公式', name: 'CG', formula: "(M2 U') (M U2 M') (U' M2)" },
-            { id: 'GC', group: '基础棱块公式', name: 'GC', formula: "(M2 U) (M U2 M') (U M2)" },
-            { id: 'DH', group: '基础棱块公式', name: 'DH', formula: "(M U M' U2) (M U M')" },
-            { id: 'HD', group: '基础棱块公式', name: 'HD', formula: "(M U' M' U2) (M U' M')" },
-            { id: 'CH', group: '基础棱块公式', name: 'CH', formula: "(S R' F R) (S' R' F' R)" },
-            { id: 'HC', group: '基础棱块公式', name: 'HC', formula: "(R' F R S) (R' F' R S')" },
-            { id: 'DG', group: '基础棱块公式', name: 'DG', formula: "(L F' L' S') (L F L' S)" },
-            { id: 'GD', group: '基础棱块公式', name: 'GD', formula: "(S' L F' L') (S L F L')" }
+            // ===== CG 组 =====
+            { id: 'CG', group: 'CG 组', name: 'CG', formula: "(M2 U') (M U2 M') (U' M2)" },
+            { id: 'GC', group: 'CG 组', name: 'GC', formula: "(M2 U) (M U2 M') (U M2)" },
+            { id: 'DH', group: 'CG 组', name: 'DH', formula: "(M U M' U2) (M U M')" },
+            { id: 'HD', group: 'CG 组', name: 'HD', formula: "(M U' M' U2) (M U' M')" },
+            { id: 'CH', group: 'CG 组', name: 'CH', formula: "(S R' F R) (S' R' F' R)" },
+            { id: 'HC', group: 'CG 组', name: 'HC', formula: "(R' F R S) (R' F' R S')" },
+            { id: 'DG', group: 'CG 组', name: 'DG', formula: "(L F' L' S') (L F L' S)" },
+            { id: 'GD', group: 'CG 组', name: 'GD', formula: "(S' L F' L') (S L F L')" },
+
+            // ===== EA 组 =====
+            { id: 'EA', group: 'EA 组', name: 'EA', formula: "(U2 M') (U2 M)" },
+            { id: 'AE', group: 'EA 组', name: 'AE', formula: "(M' U2) (M U2)" },
+
+            { id: 'FA', group: 'EA 组', name: 'FA', formula: "(U) (S R' F' R S' R' F R) (U')" },
+            { id: 'AF', group: 'EA 组', name: 'AF', formula: "(U) (R' F' R S R' F R S') (U')" },
+
+            { id: 'EJ', group: 'EA 组', name: 'EJ', formula: "(R' F') (R U R' E R U' R' E') (F R)" },
+            { id: 'JE', group: 'EA 组', name: 'JE', formula: "(R' F') (E R U R' E' R U' R') (F R)" },
+
+            { id: 'FJ', group: 'EA 组', name: 'FJ', formula: "(U') (R' F' R S R' F R S') (U)" },
+            { id: 'JF', group: 'EA 组', name: 'JF', formula: "(U') (S R' F' R S' R' F R) (U)" }
         ]
     },
     // 【核心修改】合并为一个 flip 模块
@@ -46,7 +60,7 @@ const formulaData = {
             { id: 'EF_Opp', group: '棱块翻色', name: '对棱翻', formula: "(M'U)×2 M'U2 (MU)×2 MU2" },
             { id: 'EF_Adj', group: '棱块翻色', name: '邻棱翻', formula: "(R'U2)(R2UR'U')(R'U2) (r U R U') r'" },
             { id: 'EF_All', group: '棱块翻色', name: '四棱翻', formula: "(M' U M' U M' U M' U')×2" },
-            
+
             // === 角块翻色 ===
             { id: '2C_Adj1', group: '角块翻色', name: '相邻顺翻(1)', formula: "(R U R' U R U2 R')(L' U' L U' L' U2 L)" },
             { id: '2C_Adj2', group: '角块翻色', name: '相邻逆翻(2)', formula: "(L' U2 L U L' U L)(R U2 R' U' R U' R')" },
@@ -61,11 +75,11 @@ const formulaData = {
     parity: {
         name: '奇偶校验公式',
         list: [
-            { 
-                id: 'Y_Perm', 
-                group: '奇偶校验', 
-                name: 'Y Perm (C+G)', 
-                formula: "F R U' R' U' R U R' F' R U R' U' R' F R F'" 
+            {
+                id: 'Y_Perm',
+                group: '奇偶校验',
+                name: 'Y Perm (C+G)',
+                formula: "F R U' R' U' R U R' F' R U R' U' R' F R F'"
             }
         ]
     }

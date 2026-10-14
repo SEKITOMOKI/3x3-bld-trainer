@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 // 全局错误捕捉
-window.onerror = function(msg, url, line) {
+window.onerror = function (msg, url, line) {
     console.error("全局报错:", msg, "行号:", line);
     return false;
 };
@@ -18,6 +18,8 @@ let height = container.clientHeight || window.innerHeight;
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf0f0f0);
+window.__scene = scene;
+
 const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
 camera.position.set(4, 4, 6);
 
@@ -32,17 +34,17 @@ dirLight.position.set(5, 10, 7);
 scene.add(dirLight);
 
 const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true; 
+controls.enableDamping = true;
 controls.dampingFactor = 0.05;
-controls.minPolarAngle = 0;       
-controls.maxPolarAngle = Math.PI; 
-controls.enablePan = false;       
+controls.minPolarAngle = 0;
+controls.maxPolarAngle = Math.PI;
+controls.enablePan = false;
 
 // ================= 2. 状态与数据定义 =================
-const cubies = []; 
+const cubies = [];
 const cubeSize = 0.95;
-let showLetters = false; 
-let focusMode = 'none'; 
+let showLetters = false;
+let focusMode = 'none';
 
 const colors = {
     up: 0xffff00, down: 0xffffff, front: 0xff0000,
@@ -52,12 +54,12 @@ const colors = {
 const blackMaterial = new THREE.MeshBasicMaterial({ color: 0x111111, side: THREE.DoubleSide });
 
 const letterMaps = {
-    U: [['D', 'E', 'G'], ['C', '', 'G'], ['*', '*', 'J']], 
-    F: [['*', '*', 'L'], ['S', '', 'Q'], ['N', 'J', 'Y']], 
-    L: [['E', 'D', '*'], ['X', '', 'T'], ['Q', 'L', 'M']], 
-    R: [['K', 'H', 'A'], ['R', '', 'Z'], ['Z', 'P', 'S']], 
-    D: [['W', 'A', 'X'], ['K', '', 'B'], ['B', 'M', 'R']], 
-    B: [['H', 'F', 'F'], ['Y', '', 'W'], ['T', 'N', 'P']]  
+    U: [['D', 'E', 'G'], ['C', '', 'G'], ['*', '*', 'J']],
+    F: [['*', '*', 'L'], ['S', '', 'Q'], ['N', 'J', 'Y']],
+    L: [['E', 'D', '*'], ['X', '', 'T'], ['Q', 'L', 'M']],
+    R: [['K', 'H', 'A'], ['R', '', 'Z'], ['Z', 'P', 'S']],
+    D: [['W', 'A', 'X'], ['K', '', 'B'], ['B', 'M', 'R']],
+    B: [['H', 'F', 'F'], ['Y', '', 'W'], ['T', 'N', 'P']]
 };
 
 function createStickerTexture(colorHex, letter) {
@@ -112,12 +114,12 @@ function createCubie(x, y, z) {
 const cubeGroup = new THREE.Group();
 for (let x = -1; x <= 1; x++) for (let y = -1; y <= 1; y++) for (let z = -1; z <= 1; z++) {
     if (x === 0 && y === 0 && z === 0) continue;
-    const cubie = createCubie(x, y, z); 
-    cubeGroup.add(cubie); 
+    const cubie = createCubie(x, y, z);
+    cubeGroup.add(cubie);
     cubies.push(cubie);
 }
 cubeGroup.position.x = 0;
-controls.target.set(0, 0, 0); 
+controls.target.set(0, 0, 0);
 controls.update();
 scene.add(cubeGroup);
 
@@ -130,17 +132,17 @@ function parseFormula(formula) {
     while ((match = regex.exec(cleanFormula)) !== null) {
         const face = match[1]; const modifier = match[2];
         let baseMoves = [];
-        switch(face) {
-            case 'R': baseMoves = [{axis: 'x', layers: [1], dir: -1}]; break;
-            case 'L': baseMoves = [{axis: 'x', layers: [-1], dir: 1}]; break;
-            case 'U': baseMoves = [{axis: 'y', layers: [1], dir: -1}]; break;
-            case 'D': baseMoves = [{axis: 'y', layers: [-1], dir: 1}]; break;
-            case 'F': baseMoves = [{axis: 'z', layers: [1], dir: -1}]; break;
-            case 'B': baseMoves = [{axis: 'z', layers: [-1], dir: 1}]; break;
-            case 'r': baseMoves = [{axis: 'x', layers: [1, 0], dir: -1}]; break;
-            case 'x': baseMoves = [{axis: 'x', layers: [1, 0, -1], dir: -1}]; break;
-            case 'y': baseMoves = [{axis: 'y', layers: [1, 0, -1], dir: -1}]; break;
-            case 'z': baseMoves = [{axis: 'z', layers: [1, 0, -1], dir: -1}]; break;
+        switch (face) {
+            case 'R': baseMoves = [{ axis: 'x', layers: [1], dir: -1 }]; break;
+            case 'L': baseMoves = [{ axis: 'x', layers: [-1], dir: 1 }]; break;
+            case 'U': baseMoves = [{ axis: 'y', layers: [1], dir: -1 }]; break;
+            case 'D': baseMoves = [{ axis: 'y', layers: [-1], dir: 1 }]; break;
+            case 'F': baseMoves = [{ axis: 'z', layers: [1], dir: -1 }]; break;
+            case 'B': baseMoves = [{ axis: 'z', layers: [-1], dir: 1 }]; break;
+            case 'r': baseMoves = [{ axis: 'x', layers: [1, 0], dir: -1 }]; break;
+            case 'x': baseMoves = [{ axis: 'x', layers: [1, 0, -1], dir: -1 }]; break;
+            case 'y': baseMoves = [{ axis: 'y', layers: [1, 0, -1], dir: -1 }]; break;
+            case 'z': baseMoves = [{ axis: 'z', layers: [1, 0, -1], dir: -1 }]; break;
         }
         let finalMoves = [];
         baseMoves.forEach(move => {
@@ -160,7 +162,7 @@ function parseFormula(formula) {
 
 // ================= 4. 核心动画与队列逻辑 =================
 let isAnimating = false;
-const animationQueue = []; 
+const animationQueue = [];
 
 function executeRotationInstant(axis, layers, direction) {
     const targetCubies = cubies.filter(c => layers.includes(c.userData[axis]));
@@ -201,7 +203,7 @@ function processQueue() {
     if (isAnimating || animationQueue.length === 0) {
         if (animationQueue.length === 0 && isScrambling) {
             isScrambling = false;
-            rotateToYellowRed(); 
+            rotateToYellowRed();
         }
         return;
     }
@@ -256,7 +258,7 @@ function executeRotation(axis, layers, direction, duration) {
 }
 
 // ================= 5. 交互按钮逻辑 =================
-let currentScrambleState = 0; 
+let currentScrambleState = 0;
 let isScrambling = false;
 let lastScramble = '';
 
@@ -308,11 +310,11 @@ function applyVisibility() {
     });
 }
 
-document.getElementById('scrambleBtn').addEventListener('click', function() {
+document.getElementById('scrambleBtn').addEventListener('click', function () {
     const displayEl = document.getElementById('scramble-display');
     if (currentScrambleState === 0) {
         resetCubeState();
-        rotateToWhiteGreen(); 
+        rotateToWhiteGreen();
         lastScramble = generateLocalScramble();
         isScrambling = true;
         currentScrambleState = 1;
@@ -333,7 +335,7 @@ document.getElementById('scrambleBtn').addEventListener('click', function() {
     }
 });
 
-document.getElementById('focusCornerBtn').addEventListener('click', function() {
+document.getElementById('focusCornerBtn').addEventListener('click', function () {
     if (focusMode === 'corner') { focusMode = 'none'; this.textContent = '角块'; this.style.background = '#9C27B0'; }
     else { focusMode = 'corner'; this.textContent = '取消角块专注'; this.style.background = '#f44336'; }
     const edgeBtn = document.getElementById('focusEdgeBtn');
@@ -341,7 +343,7 @@ document.getElementById('focusCornerBtn').addEventListener('click', function() {
     applyVisibility();
 });
 
-document.getElementById('focusEdgeBtn').addEventListener('click', function() {
+document.getElementById('focusEdgeBtn').addEventListener('click', function () {
     if (focusMode === 'edge') { focusMode = 'none'; this.textContent = '棱块'; this.style.background = '#FF9800'; }
     else { focusMode = 'edge'; this.textContent = '取消棱块专注'; this.style.background = '#f44336'; }
     const cornerBtn = document.getElementById('focusCornerBtn');
@@ -378,7 +380,7 @@ document.getElementById('toggleCubeBtn').addEventListener('click', (e) => {
     isCubeVisible = !isCubeVisible;
     cubies.forEach(cubie => { cubie.visible = isCubeVisible; });
     e.target.textContent = isCubeVisible ? '隐藏' : '显示';
-    e.target.style.background = isCubeVisible ? '#fff' : '#f44336'; 
+    e.target.style.background = isCubeVisible ? '#fff' : '#f44336';
     e.target.style.color = isCubeVisible ? '#333' : 'white';
 });
 
@@ -392,19 +394,19 @@ function formatNoteInput(inputElement, event) {
 
     // 移除非字母字符，转大写
     let rawValue = inputElement.value.replace(/[^A-Za-z]/g, '').toUpperCase();
-    
+
     // 如果用户全部删除，则清空
     if (rawValue.length === 0) {
         inputElement.value = '';
         return;
     }
-    
+
     // 每两个字符插入一个空格
     let formattedValue = '';
     for (let i = 0; i < rawValue.length; i += 2) {
         formattedValue += rawValue.substring(i, i + 2) + ' ';
     }
-    
+
     // 设置回输入框
     inputElement.value = formattedValue;
 }
@@ -413,7 +415,7 @@ function formatNoteInput(inputElement, event) {
 ['noteCorner', 'noteEdge'].forEach(id => {
     const el = document.getElementById(id);
     if (el) {
-        el.addEventListener('input', function(e) {
+        el.addEventListener('input', function (e) {
             formatNoteInput(this, e); // 把事件对象 e 传进去
         });
     }
@@ -437,7 +439,7 @@ function updateLayout() {
 
     // 如果侧边栏隐藏，宽度视为 0；否则减去侧边栏宽度
     let w = window.innerWidth - sidebarWidth;
-    if (w < 100) w = window.innerWidth; 
+    if (w < 100) w = window.innerWidth;
     let h = window.innerHeight;
 
     if (practiceArea) {
@@ -451,12 +453,12 @@ function updateLayout() {
         resizerEl.style.right = sidebarWidth + 'px';
     }
 
-    const baseWidth = 800; 
-    const baseDistance = 8.2; 
-    const scaleFactor = baseWidth / w; 
-    const finalScale = Math.max(0.8, Math.min(1.5, scaleFactor)); 
+    const baseWidth = 800;
+    const baseDistance = 8.2;
+    const scaleFactor = baseWidth / w;
+    const finalScale = Math.max(0.8, Math.min(1.5, scaleFactor));
     const d = baseDistance * finalScale;
-    
+
     const dir = new THREE.Vector3(4, 4, 6).normalize();
     camera.position.copy(dir.multiplyScalar(d));
 
@@ -484,25 +486,25 @@ const sidebarHandle = document.getElementById('sidebarHandle');
 
 let isResizing = false;
 let isSidebarCollapsed = false;
-let lastSidebarWidth = 350; 
+let lastSidebarWidth = 350;
 
 function expandSidebar() {
     isSidebarCollapsed = false;
-    sidebar.style.display = 'flex'; 
+    sidebar.style.display = 'flex';
     const targetWidth = (lastSidebarWidth && lastSidebarWidth > 250) ? lastSidebarWidth : 350;
     sidebar.style.width = targetWidth + 'px';
     sidebar.style.padding = '30px 20px';
     sidebar.style.overflowY = 'auto';
-    sidebarHandle.style.display = 'none'; 
-    resizer.style.display = 'block'; 
+    sidebarHandle.style.display = 'none';
+    resizer.style.display = 'block';
     updateLayout();
 }
 
 function collapseSidebar() {
     isSidebarCollapsed = true;
-    sidebar.style.display = 'none'; 
-    sidebarHandle.style.display = 'block'; 
-    resizer.style.display = 'none'; 
+    sidebar.style.display = 'none';
+    sidebarHandle.style.display = 'block';
+    resizer.style.display = 'none';
     updateLayout();
 }
 
@@ -515,7 +517,7 @@ resizer.addEventListener('pointerdown', (e) => {
     resizer.classList.add('active');
     resizer.setPointerCapture(e.pointerId);
     document.body.style.userSelect = 'none';
-    lastSidebarWidth = sidebar.clientWidth; 
+    lastSidebarWidth = sidebar.clientWidth;
 });
 
 resizer.addEventListener('pointermove', (e) => {
@@ -547,7 +549,7 @@ resizer.addEventListener('pointerup', (e) => {
         resizer.classList.remove('active');
         if (e.pointerId) resizer.releasePointerCapture(e.pointerId);
         document.body.style.userSelect = '';
-        
+
         // 如果松开时宽度依然在合理范围，记录为最终宽度
         if (sidebar.clientWidth >= 200) {
             lastSidebarWidth = sidebar.clientWidth;
@@ -565,3 +567,58 @@ resizer.addEventListener('pointercancel', (e) => {
         updateLayout();
     }
 });
+
+
+
+// ================= 10. 主题切换逻辑 =================
+const THEME_KEY = 'bld_trainer_theme';
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+
+    // 同步 3D 场景背景色
+    if (scene.background && scene.background.isColor) {
+        scene.background.setHex(theme === 'dark' ? 0x0e1016 : 0xf0f0f0);
+    }
+
+    // 同步 body 背景色
+    document.body.style.backgroundColor = theme === 'dark' ? '#0e1016' : '#f0f0f0';
+}
+
+function getStoredTheme() {
+    try { return localStorage.getItem(THEME_KEY); } catch (e) { return null; }
+}
+
+function storeTheme(theme) {
+    try { localStorage.setItem(THEME_KEY, theme); } catch (e) { }
+}
+
+function initTheme() {
+    let theme = getStoredTheme();
+    if (theme !== 'light' && theme !== 'dark') {
+        theme = 'dark';   // 默认深色
+    }
+    applyTheme(theme);
+}
+
+function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme') || 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    storeTheme(next);
+}
+
+// 监听其他页面的主题变化（速刷联想词页面 ↔ 主页同步）
+window.addEventListener('storage', (e) => {
+    if (e.key === THEME_KEY && e.newValue) {
+        applyTheme(e.newValue);
+    }
+});
+
+initTheme();
+
+// 绑定主题切换按钮
+const themeToggleBtn = document.getElementById('themeToggle');
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -14,6 +14,7 @@
                 "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
             }
         }
+        
     </script>
     <style>
         /* 【修改】侧边栏顶部标题区样式：放大字体 */
@@ -25,37 +26,31 @@
         }
 
         .sidebar-header h1 {
-            margin: 0 0 10px 0;
+            margin: 0 0 12px 0;
             font-size: 22px;
-            /* 从 16px 放大到 22px */
             line-height: 1.5;
-            color: #333;
             font-weight: bold;
         }
 
-        .sidebar-header .author {
-            font-size: 15px;
-            /* 从 12px 放大到 15px */
-            color: #888;
+        .sidebar-header h1 .title-link {
+            color: #333;
             text-decoration: none;
-            transition: color 0.2s;
+            transition: color 0.2s, opacity 0.2s;
+            display: inline-block;
+            cursor: pointer;
         }
 
-        .sidebar-header .author:hover {
+        .sidebar-header h1 .title-link:hover {
             color: #2196F3;
-            text-decoration: underline;
         }
 
-        /* 当侧边栏非常窄时（用户向右拖拽），自动缩小字体防止换行溢出 */
+        .sidebar-header h1 .title-link:active {
+            opacity: 0.75;
+        }
+
         @media (max-width: 1200px) {
             .sidebar-header h1 {
                 font-size: 18px;
-                /* 从 13px 提升到 18px */
-            }
-
-            .sidebar-header .author {
-                font-size: 13px;
-                /* 从 10px 提升到 13px */
             }
         }
     </style>
@@ -92,9 +87,24 @@
         <aside class="sidebar">
             <!-- 【新增】平台标题与作者署名 -->
             <div class="sidebar-header">
-                <h1>三阶盲拧彳亍法<br>新手练习平台</h1>
-                <a href="https://github.com/SEKITOMOKI/3x3-bld-trainer" target="_blank" rel="noopener" class="author">by
-                    SEKITOMOKI</a>
+                <h1>
+                    <a href="https://github.com/SEKITOMOKI/3x3-bld-trainer" target="_blank" rel="noopener noreferrer"
+                        class="title-link" title="访问 GitHub 仓库">
+                        三阶盲拧彳亍法<br>新手练习平台
+                    </a>
+                </h1>
+                <button class="theme-toggle" id="themeToggle" aria-label="切换主题" title="切换深色 / 浅色主题">
+                    <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                    </svg>
+                    <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="4" />
+                        <path
+                            d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+                    </svg>
+                </button>
             </div>
 
             <div class="menu-list">
@@ -102,6 +112,7 @@
                 <a href="category.html?type=menu" class="menu-btn">公式</a>
                 <!-- 记忆训练按钮 -->
                 <a href="memory.html" class="menu-btn">记忆训练</a>
+                <a href="speed-association.html" class="menu-btn">速刷联想词</a>
             </div>
 
             <!-- 当前打乱编码笔记面板 -->

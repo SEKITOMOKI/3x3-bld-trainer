@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -87,6 +87,38 @@
             color: #888;
             font-size: 18px;
             margin-top: 50px;
+        }
+    </style>
+    <style>
+        /* ================= 深色主题覆盖 ================= */
+        [data-theme="dark"] body {
+            background: #0e1016;
+        }
+
+        [data-theme="dark"] h1 {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .back-btn {
+            color: #6fb1ff;
+        }
+
+        [data-theme="dark"] .formula-btn,
+        [data-theme="dark"] .menu-btn {
+            background: #171b26;
+            border-color: #4a7fe8;
+            color: #6fb1ff;
+        }
+
+        [data-theme="dark"] .formula-btn:hover,
+        [data-theme="dark"] .menu-btn:hover {
+            background: #2196F3;
+            color: #fff;
+            border-color: #2196F3;
+        }
+
+        [data-theme="dark"] .empty-tip {
+            color: #7b849a;
         }
     </style>
 </head>
@@ -195,6 +227,26 @@
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') lockLandscape();
         });
+    </script>
+    <script>
+        (function () {
+            const THEME_KEY = 'bld_trainer_theme';
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+            function getTheme() {
+                let theme = null;
+                try { theme = localStorage.getItem(THEME_KEY); } catch (e) { }
+                if (theme !== 'light' && theme !== 'dark') {
+                    theme = 'dark';   // 默认深色
+                }
+                return theme;
+            }
+            applyTheme(getTheme());
+            window.addEventListener('storage', (e) => {
+                if (e.key === THEME_KEY && e.newValue) applyTheme(e.newValue);
+            });
+        })();
     </script>
 </body>
 

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -231,6 +231,121 @@
             max-width: 800px;
             margin-top: 30px;
         }
+
+        /* ================= 深色主题覆盖 ================= */
+        [data-theme="dark"] body {
+            background: #0e1016;
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] h1 {
+            color: #fff;
+        }
+
+        [data-theme="dark"] .back-btn {
+            color: #6fb1ff;
+        }
+
+        [data-theme="dark"] .hint {
+            color: #9aa5bd;
+        }
+
+        [data-theme="dark"] .pair-item {
+            background: #171b26;
+            border-color: #3a4254;
+        }
+
+        [data-theme="dark"] .pair-item .pair-correct {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .pair-item .pair-user {
+            color: #9aa5bd;
+        }
+
+        [data-theme="dark"] .pair-item.correct {
+            background: #101a15;
+            border-color: #2e9e63;
+        }
+
+        [data-theme="dark"] .pair-item.correct .pair-correct {
+            color: #4fd18b;
+        }
+
+        [data-theme="dark"] .pair-item.correct .pair-user {
+            color: #4fd18b;
+        }
+
+        [data-theme="dark"] .pair-item.incorrect {
+            background: #1e1215;
+            border-color: #f44336;
+        }
+
+        [data-theme="dark"] .pair-item.incorrect .pair-correct {
+            color: #ff6b6b;
+        }
+
+        [data-theme="dark"] .pair-item.incorrect .pair-user {
+            color: #ff6b6b;
+        }
+
+        [data-theme="dark"] #recallInput {
+            background: #11151e;
+            color: #e8eaf0;
+            border-color: #4a7fe8;
+        }
+
+        [data-theme="dark"] #resultSummary {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .secondary-btn {
+            background: #1e2431;
+            color: #b9c2d6;
+            border-color: #2e3648;
+        }
+
+        [data-theme="dark"] .secondary-btn:hover {
+            background: #252c3c;
+        }
+
+        [data-theme="dark"] .wordlist-panel {
+            background: #171b26;
+            border-color: #262c3a;
+        }
+
+        [data-theme="dark"] .wordlist-panel summary {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .wl-tools input {
+            background: #11151e;
+            border-color: #2c3446;
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .wl-item {
+            background: #11151e;
+            border-color: #262c3a;
+        }
+
+        [data-theme="dark"] .wl-word {
+            color: #c6cee0;
+        }
+
+        [data-theme="dark"] .wl-empty {
+            color: #7b849a;
+        }
+
+        [data-theme="dark"] .wl-footer button {
+            background: #1e2431;
+            color: #b9c2d6;
+            border-color: #2e3648;
+        }
+
+        [data-theme="dark"] .wl-format-tip {
+            color: #7b849a;
+        }
     </style>
 </head>
 
@@ -452,6 +567,32 @@
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') unlockOrientation();
         });
+    </script>
+
+    <script>
+        (function () {
+            const THEME_KEY = 'bld_trainer_theme';
+
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+            }
+
+            function getTheme() {
+                let theme = null;
+                try { theme = localStorage.getItem(THEME_KEY); } catch (e) { }
+                if (theme !== 'light' && theme !== 'dark') {
+                    theme = 'dark';   // 默认深色
+                }
+                return theme;
+            }
+
+            applyTheme(getTheme());
+
+            // 监听 index.html / 其他页面的主题变化
+            window.addEventListener('storage', (e) => {
+                if (e.key === THEME_KEY && e.newValue) applyTheme(e.newValue);
+            });
+        })();
     </script>
 </body>
 

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>速刷联想词 · 三阶盲拧彳亍法新手练习平台</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/speed-association.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <header class="topbar">
+            <a href="index.html" class="btn back-btn small">← 返回主页</a>
+            <div class="topbar-right">
+                <div class="brand">🧩 速刷联想词</div>
+                <div class="chips">
+                    <span class="chip" id="roundInfo">第 1 轮</span>
+                    <span class="chip" id="masteredInfo">已掌握 0 / 462</span>
+                    <span class="chip" id="focusInfo">重点 0</span>
+                </div>
+            </div>
+        </header>
+
+        <section class="card" id="mainCard">
+            <div class="progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressBar"></div>
+                </div>
+                <div class="progress-text" id="progressInfo">0 / 0</div>
+            </div>
+
+            <div class="pair" id="pair"><span>A</span><span>B</span></div>
+            <div class="hint" id="hint"></div>
+
+            <div class="input-row" id="inputRow">
+                <input id="answerInput" type="text" placeholder="输入联想词，回车提交" autocomplete="off" autocapitalize="off"
+                    spellcheck="false">
+                <button class="btn ghost" id="dontKnowBtn" title="不会就点它：标记为重点并查看答案">不知道</button>
+                <button class="btn primary" id="submitBtn">提交</button>
+            </div>
+
+            <div class="feedback" id="feedback"></div>
+        </section>
+
+        <section class="card" id="completeCard" style="display:none"></section>
+
+        <details class="card wordlist" id="wordlistPanel">
+            <summary>📖 我的词库 <span class="muted small" id="wordlistCount"></span></summary>
+            <div class="wl-tools">
+                <input id="searchBox" type="text" placeholder="搜索字母组合或联想词" autocomplete="off">
+                <label class="wl-filter">
+                    <input type="checkbox" id="focusOnly">
+                    <span>只看重点 ★</span>
+                </label>
+            </div>
+            <div class="wl-grid" id="wordGrid"></div>
+        </details>
+
+        <footer class="footer">
+            <div class="footer-btns">
+                <button class="btn ghost small" id="exportBtn">导出备份</button>
+                <button class="btn ghost small" id="importBtn">导入备份</button>
+                <button class="btn ghost small" id="clearFocusBtn">清除所有重点</button>
+                <button class="btn ghost small" id="resetBtn">重置所有数据</button>
+            </div>
+            <span class="muted small">数据保存在本机浏览器 localStorage 中</span>
+        </footer>
+
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script src="js/speed-association.js"></script>
+    <script>
+        function unlockOrientation() {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
+                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'portrait-primary' })
+                    .catch(err => console.warn('解除屏幕方向锁定失败:', err));
+            }
+        }
+        document.addEventListener('DOMContentLoaded', unlockOrientation);
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') unlockOrientation();
+        });
+    </script>
+</body>
+
+</html>

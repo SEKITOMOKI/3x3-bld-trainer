@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" data-theme="dark">
 
 <head>
     <meta charset="UTF-8">
@@ -182,11 +182,12 @@
             background: #757575;
         }
 
-                /* ============================================================
+        /* ============================================================
          * 【核心修复】专门优化公式演示页的手机端按钮
          * 覆盖全局压缩规则，确保“演示”、“暂停”、“重置”完整显示
          * ============================================================ */
         @media (max-width: 1200px) {
+
             /* 【关键修复1】让画布容器宽度 = 屏幕宽度 - 侧边栏宽度（250px） */
             /* 彻底覆盖全局 style.css 中的 100vw */
             #canvas-container {
@@ -219,6 +220,90 @@
                 overflow: visible !important;
                 border-radius: 8px !important;
             }
+        }
+    </style>
+    <style>
+        /* ================= 深色主题覆盖 ================= */
+        [data-theme="dark"] body {
+            background: #0e1016;
+        }
+
+        [data-theme="dark"] #top-info {
+            background: rgba(23, 27, 38, 0.95);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] #top-info h2 {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .formula-label {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] #forwardFormula {
+            color: #6fb1ff;
+        }
+
+        [data-theme="dark"] #sidebar {
+            background: #171b26;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] #sidebar h3 {
+            color: #e8eaf0;
+        }
+
+        [data-theme="dark"] .sidebar-btn {
+            background: #1e2431;
+            color: #b9c2d6;
+            border-color: #2e3648;
+        }
+
+        [data-theme="dark"] .sidebar-btn:hover {
+            background: #252c3c;
+        }
+
+        [data-theme="dark"] .sidebar-btn.active {
+            background: #2196F3;
+            color: #fff;
+            border-color: #2196F3;
+        }
+
+        [data-theme="dark"] button {
+            background: #1e2431;
+            color: #b9c2d6;
+            border-color: #2e3648;
+        }
+
+        [data-theme="dark"] button:hover {
+            background: #252c3c;
+        }
+
+        [data-theme="dark"] #playBtn {
+            background: #4CAF50;
+            color: #fff;
+            border-color: #4CAF50;
+        }
+
+        [data-theme="dark"] #pauseBtn,
+        [data-theme="dark"] #resetBtn {
+            background: #1e2431;
+            color: #b9c2d6;
+            border-color: #2e3648;
+        }
+
+        /* 深色下让返回主页按钮更醒目 */
+        [data-theme="dark"] .sidebar-btn.sidebar-back {
+            background: rgba(111, 177, 255, 0.18);
+            color: #6fb1ff;
+            border: 1px solid #6fb1ff;
+        }
+
+        [data-theme="dark"] .sidebar-btn.sidebar-back:hover {
+            background: linear-gradient(180deg, #5a8df0, #3f6fd8);
+            color: #fff;
+            border-color: #5a8df0;
         }
     </style>
     <script type="importmap">
@@ -271,6 +356,45 @@
         document.addEventListener('visibilitychange', () => {
             if (document.visibilityState === 'visible') lockLandscape();
         });
+    </script>
+    <script>
+        (function () {
+            const THEME_KEY = 'bld_trainer_theme';
+
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                if (window.__scene && window.__scene.background && window.__scene.background.isColor) {
+                    window.__scene.background.setHex(theme === 'dark' ? 0x0e1016 : 0xf0f0f0);
+                }
+            }
+
+            function getTheme() {
+                let theme = null;
+                try { theme = localStorage.getItem(THEME_KEY); } catch (e) { }
+                if (theme !== 'light' && theme !== 'dark') {
+                    theme = 'dark';   // 默认深色
+                }
+                return theme;
+            }
+
+            applyTheme(getTheme());
+
+            // formula.js 是 module，场景可能稍后才创建，轮询等待
+            let attempts = 0;
+            const t = setInterval(() => {
+                attempts++;
+                if (window.__scene) {
+                    applyTheme(getTheme());
+                    clearInterval(t);
+                } else if (attempts > 100) {
+                    clearInterval(t);
+                }
+            }, 50);
+
+            window.addEventListener('storage', (e) => {
+                if (e.key === THEME_KEY && e.newValue) applyTheme(e.newValue);
+            });
+        })();
     </script>
 </body>
 
