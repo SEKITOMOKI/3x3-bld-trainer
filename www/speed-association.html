@@ -78,7 +78,7 @@
     <script>
         function unlockOrientation() {
             if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
-                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'portrait-primary' })
+                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'any' })
                     .catch(err => console.warn('解除屏幕方向锁定失败:', err));
             }
         }

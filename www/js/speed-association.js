@@ -472,6 +472,15 @@
         if (e.key === THEME_KEY && e.newValue) {
             applyTheme(e.newValue);
         }
+        if (e.key === STORAGE_KEY) {
+            // 联想词在别处被改了，重新加载状态
+            const newState = loadState();
+            if (newState) {
+                state = newState;
+                render();
+                if ($('wordlistPanel').open) renderWordList();
+            }
+        }
     });
     init();
 })();

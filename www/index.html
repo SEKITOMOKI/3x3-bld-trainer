@@ -161,6 +161,38 @@
     <script type="module" src="js/main.js"></script>
     <!-- 引入联想词库逻辑 -->
     <script src="js/assoc.js"></script>
+
+    <!-- 主页锁横屏 -->
+    <script>
+        function lockLandscape() {
+            if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.ScreenOrientation) {
+                window.Capacitor.Plugins.ScreenOrientation.lock({ orientation: 'landscape' })
+                    .catch(err => console.warn('锁定横屏失败:', err));
+            }
+        }
+
+        // 立即尝试
+        lockLandscape();
+
+        // DOM 加载后
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', lockLandscape);
+        }
+
+        // 延时兜底（防止 Capacitor 注入延迟）
+        setTimeout(lockLandscape, 100);
+        setTimeout(lockLandscape, 500);
+        setTimeout(lockLandscape, 1500);
+
+        // 从后台切回时重新锁
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') lockLandscape();
+        });
+
+        // Capacitor 原生生命周期
+        document.addEventListener('resume', lockLandscape);
+        window.addEventListener('pageshow', lockLandscape);
+    </script>
 </body>
 
 </html>
